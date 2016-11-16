@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Workflow Management Tool Documentation &#8212; Asap 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Asap 0.0 documentation" href="index.html" />
+    <link rel="next" title="Welcome to IReS’s documentation!" href="ires_docs/ires_index.html" />
+    <link rel="prev" title="Introduction" href="intro.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="workflow-management-tool-documentation">
+<h1>Workflow Management Tool Documentation<a class="headerlink" href="#workflow-management-tool-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The Workflow Management Tool (WMT) is a component of the ASAP system architecture. It is used for workflow creation, modification, analysis and optimisation. WMT provides a GUI for workflow design. The model underlying WMT combines simplicity of expression of application logic and adaptation of the level of description of execution semantics. It enables the separation of task dependencies from task functionality. In this way, WMT can be easily, i.e. intuitively and in a straightforward manner, used by many types of users, with various levels of data management expertise and interest in the implementation. The workflow and the including tasks are described using a JSON-based metadata language. The workflow is analysed and the result of the analysis can be a list of detected errors of a workflow or an analysed workflow which is actually an enhancement of the initial workflow with more vertices, substitution of vertices and/or edges in the initial workflow with others, and addition of metadata to the tasks. WMT is a fully open-source instrument that includes the designing interface, as well as analysis and optimisation modules.</p>
+</div>
+<div class="section" id="workflow-representation">
+<h2>Workflow Representation<a class="headerlink" href="#workflow-representation" title="Permalink to this headline">¶</a></h2>
+<p>In WMT, a workflow is represented in a single JSON file. This representation captures structural information, design metadata (e.g., functional and non-functional requirements, physical characteristics like resource allocation), operator properties (e.g., type, schemata, statistics, engine and implementation details, physical characteristics like memory budget), and so on.
+The first levels of the metadata tree of the workflow are the following (shown in the Figure below):</p>
+<ul class="simple">
+<li><strong>Nodes</strong> Each node contains a list of task IDs which belong to this node.</li>
+<li><strong>Edges</strong> This is a list of pairs of node IDs - (sourceId, targetId). An edge defines the flow of data from one vertex to another. These nodes are called the source and the target, respectively.</li>
+<li><strong>Tasks</strong> This part contains a list of task meta-data. The task meta-data consists of the information that is used to match abstract and materialized operators and datasets and the ID of a node to which this task belongs.</li>
+<li><strong>TaskLinks</strong> (optional) This part contains links between tasks lying within a single node.</li>
+</ul>
+<img alt="_images/wtree.png" src="_images/wtree.png" />
+</div>
+<div class="section" id="workflow-analysis">
+<h2>Workflow Analysis<a class="headerlink" href="#workflow-analysis" title="Permalink to this headline">¶</a></h2>
+<p>The workflow structure alleviates from the user the burden of determining any or some execution semantics for the application logic. The execution semantics of the workflow includes the execution of tasks in vertices and the execution of input-output dependencies of edges. The determination of the execution semantics of vertices and edges leads to an execution plan of the workflow. We refer to this plan as the analysed workflow. The latter is actually an enhancement of the initial workflow with more vertices, and substitution of vertices and/or edges in the initial workflow with others. More specifically, in the analysed workflow, an edge with different input and output metadata, may be replaced with two edges and a new vertex; the new vertex corresponds to a new task that takes the data and metadata of the input of the initial edge and produces the data and metadata of the output of the initial edge. In other words, since the data of the input and the output of an edge are equivalent, this task changes only the metadata. Such vertices are associative, as they encompass associative tasks. Also, a vertex that includes multiple tasks, in the original workflow, is replaced, in the analysed workflow, with a set of new vertices that each includes one task of the original vertex. The new vertices may or may not be connected with new edges. Furthermore, in the analysed workflow, a vertex that corresponds to multiple tasks is replaced with an associative subgraph that contains a set of new vertices that correspond to these tasks. This set contains vertices that correspond to the tasks of the initial vertex: each new vertex corresponds to one task; vertices may correspond 1-1 to tasks, but it can be the case that two or more vertices correspond to the same task. Naturally, the incoming edges of the initial vertex may have to be replicated, since they may correspond to the input of more than one tasks. The outgoing edges, however, remain the same, as each corresponds to the output of one task. The replacing subgraph may also contain new edges that connect the replacing vertices. Such edges represent the dependencies between tasks related to their execution semantics, and not related to the semantics of the application logic, as expressed by the user.</p>
+</div>
+<div class="section" id="workflow-implementation">
+<h2>Workflow Implementation<a class="headerlink" href="#workflow-implementation" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/architect.png" src="_images/architect.png" />
+<p>The above figure depicts the architecture of WMT as well as its interaction with external components. The main components of the architecture are:</p>
+<ul class="simple">
+<li><strong>Interface</strong> The interface accepts a workflow definition in the workflow representation. It enables users to interactively create and/or modify a workflow.</li>
+<li><strong>Analyzer</strong> The analyzer parses the workflow, identifies operators and data stores and maps them to a library of operators supported in WMT, generates metadata of edges, finds edges where the data conversion should be applied and adds the appropriate conversions.</li>
+<li><strong>Optimizer</strong> The optimizer generates a functionally equivalent workflow graph optimized towards the performance objective.</li>
+</ul>
+<p>These provide for workflow design, analysis and optimization. After their design, analysis and optimization, workflows are ready for their execution. They can be executed on independent engines and storage repositories, i.e. engines and repositories that may be accessed through other paths in ASAP or another third party platform, besides WMT.</p>
+</div>
+<div class="section" id="workflow-architecture">
+<h2>Workflow Architecture<a class="headerlink" href="#workflow-architecture" title="Permalink to this headline">¶</a></h2>
+<p>WMT interface is a web application. It provides full functionality for designing a workflow even in the absence of server-side (Analyzer and Optimizer modules). It is encoded in Hypertext Markup Language (HTML) . To deliver content, WMT uses the Nginx web server. To encode business logic, WMT uses Javascript and PHP-FPM. The pages and scripts are compiled using Grunt. The Analysis and Optimisation modules are scripts in Python. The figure below depicts the technical stack used in WMT and the interaction of WMT parts.</p>
+<img alt="_images/tech_stack.png" src="_images/tech_stack.png" />
+</div>
+<div class="section" id="workflow-functionality">
+<h2>Workflow Functionality<a class="headerlink" href="#workflow-functionality" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/gui.png" src="_images/gui.png" />
+<p>WMT provides a GUI to enable users to design workflows and perform analysis and optimization. The GUI consists of several areas (Figure 4.1) that perform the following functions:
+• Display the workflow (Area 1).
+• Add nodes and edges (Area 2). This process depicted in the figure above. First, the user adds a node, then she adds two tasks in it from the operators library, and finally she connects nodes and tasks.
+• Create a new workflow from scratch, save and load it.
+• Perform workflow analysis or optimization.
+• Add tasks from a library (see the figure below) or create new ones (Area 3). If the user adds a task from a library then it is accompanied by a set of metadata, i.e., properties that describe them. If a new task is created then the first levels of the metadata tree are predefined but users can add their ad-hoc subtrees to define their custom data or operators.
+• Display metadata of the selected task (Area 4).</p>
+<img alt="_images/lib_buttons.png" src="_images/lib_buttons.png" />
+</div>
+<div class="section" id="link">
+<h2>Link<a class="headerlink" href="#link" title="Permalink to this headline">¶</a></h2>
+<p>The code of the WMT can be found in &lt;<a class="reference external" href="https://github.com/project-asap/workflow.git">https://github.com/project-asap/workflow.git</a>&gt;</p>
+</div>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>For demostration reasons a Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.</p>
+<p>The installation instructions are the following:</p>
+<ol class="loweralpha simple">
+<li>Install nginx, php-fpm, npm and python packages. Execute the command: sudo apt-get install nginx php-fpm npm python</li>
+<li>The project&#8217;s root directory stores a configuration file for nginx: wmt.conf.default. It should be changed appropriately: on line 5 set $ROOT &#8220;/your/path/to/wmt&#8221;;. Then you can use this file for nginx server configuration: ln -s ~/your/path/to/wmt/wmt.conf /your/nginx/installation/servers/ (where nginx server is installed.)</li>
+<li>Install the Grunt&#8217;s command line interface (CLI) globally can be done with the following commands: sudo npm install -g grunt-cli</li>
+<li>Start nginx: sudo service nginx start</li>
+</ol>
+</div>
+<div class="section" id="tests">
+<h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
+<p>To run tests, do python -m unittest -v testmain in the directory pub/py/ Currently, the following functions have test coverage:</p>
+<ol class="arabic simple">
+<li><em>analyse()</em> - comparison of its result with the presaved result in a file testwl-a.json</li>
+<li><em>save()</em> - checking that save function generates a file with correct name</li>
+<li><em>execute()</em> - checking that execute function saves a workflow in IReS format (correct folder and presence of required files in it)</li>
+<li><em>findNode()</em> - checking that found node with findNode function has correct id</li>
+<li><em>findTask()</em> - checking that found task with findTask function has correct id</li>
+<li><em>findEdge()</em> - checking that found edge with findEdge function has correct id</li>
+<li><em>dict2text()</em> - comparison of its result with the presaved result</li>
+</ol>
+</div>
+<div class="section" id="design-a-workflow">
+<h2>Design a workflow<a class="headerlink" href="#design-a-workflow" title="Permalink to this headline">¶</a></h2>
+<p>Creating a workflow from scratch can be done by following steps:</p>
+<ol class="arabic simple">
+<li>First, click new workflow on the top of the page.</li>
+<li>Then, create a graph of a workflow: add nodes and datastores using buttons add datastore and add node; connect them using button add links, when it is pressed сlicking on the first then the second nodes adds an edge between them.</li>
+<li>Add tasks into the nodes: choose a node; click add task on the left sidebar; choose from the list of operators and then edit metadata to your needs.</li>
+<li>Save the workflow, click save workflow on the top navbar.</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Workflow Management Tool Documentation</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#workflow-representation">Workflow Representation</a></li>
+<li><a class="reference internal" href="#workflow-analysis">Workflow Analysis</a></li>
+<li><a class="reference internal" href="#workflow-implementation">Workflow Implementation</a></li>
+<li><a class="reference internal" href="#workflow-architecture">Workflow Architecture</a></li>
+<li><a class="reference internal" href="#workflow-functionality">Workflow Functionality</a></li>
+<li><a class="reference internal" href="#link">Link</a></li>
+<li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#tests">Tests</a></li>
+<li><a class="reference internal" href="#design-a-workflow">Design a workflow</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="intro.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="ires_docs/ires_index.html" title="next chapter">Welcome to IReS&#8217;s documentation!</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/wmt.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Asap consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/wmt.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

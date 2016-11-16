@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &amp; Deployment &#8212; Asap 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="Asap 0.0 documentation" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation-deployment">
+<h1>Installation &amp; Deployment<a class="headerlink" href="#installation-deployment" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-ires-platform">
+<h2>Installing IReS-Platform<a class="headerlink" href="#installing-ires-platform" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
+<p>Installation of IRes-Platform requires 3 steps</p>
+<ol class="arabic simple">
+<li>Clone IReS-Platform to the server. For a quick reference of how to use git, click <a class="reference external" href="https://rogerdudler.github.io/git-guide/">here</a></li>
+<li>Build IReS-Platform project using maven. A tutorial about maven can be found here Maven Getting Started Guide. Update configuration files and folders appropriately.</li>
+<li>Clone: Open a terminal (Linux) or a cmd (Windows) and navigate to a desired directory (create it if does not exist) where IReS-Platform files will be cloned e.g. asap. In the github page of the IReS-Platform, <a class="reference external" href="https://github.com/project-asap/IReS-Platform">https://github.com/project-asap/IReS-Platform</a>, at the right sidebar, under the label &#8220;HTTPS clone URL&#8221; the clone url can be found. Copy this url and from inside the terminal execute the command <code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">clone_url</span></code></li>
+</ol>
+</div>
+<div class="section" id="build">
+<h3>Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
+<p>For demostration reasons a Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.</p>
+<p>The local home directory of the IReS-Platform project is</p>
+<p><code class="docutils literal"><span class="pre">IRES_HOME=/home/$USER/asap/IReS-Platform</span></code></p>
+<p>NOTE:</p>
+<p>the &#8220;$USER&#8221; part of the IRES_HOME corresponds to the currently logged in user
+it is assumed that the project has been cloned into the directory /home/$USER/asap
+to refer to the value of IRES_HOME the bash script variable notation is used i.e. $IRES_HOME
+To build the project use version 3 of maven because the previous version has bugs with jetty and jersey packages. In Ubuntu just execute</p>
+<p><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">maven</span></code></p>
+<p>and confirm the maven version by running</p>
+<p><code class="docutils literal"><span class="pre">mvn</span> <span class="pre">-v</span></code>.</p>
+<p>Then update IReS-Platform pom.xml files to point to the currently installed YARN version.</p>
+<p>To do so, the pom.xml file of the asap-platform and cloudera-kitten folders should be updated in order for the Maven to take in account the currently YARN version installed during the building phase. To do so, navigate to $IRES_HOME folder and then</p>
+<p>for the asap-platform edit the file $IRES_HOME/asap-platform/pom.xml. In particular, find the line about hadoop.version and between the tags write the version number of the currently installed YARN version e.g. 2.7.1 if the currently installed YARN is hadoop-2.7.1
+for the cloudera-kitten edit the file $IRES_HOME/cloudera-kitten/pom.xml. Again, find the line about hadoop.version and write the version number of the currently installed YARN version like before.
+Then, navigate to the folder $IRES_HOME/panic and build the corresponding project by runninng</p>
+<p><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">mvn</span> <span class="pre">clean</span> <span class="pre">install</span> <span class="pre">-DskipTests</span></code></p>
+<p>Do the same for the $IRES_HOME/cloudera-kitten folder and ignore the message &#8220;BUILD FAILURE&#8221; for the moment if that message occur. Now, build similarly the $IRES_HOME/asap-platform folder and ingore again a possible &#8220;BUILD FAILURE&#8221; message. Repeat the process for the last two folders with the same order i.e. first build $IRES_HOME/cloudera-kitten and afterwards build $IRES_HOME/asap-platform.</p>
+<p>In the end of each build you should see a &#8220;BUILD SUCCESS&#8221; message. The building order of the directories above should be followed.</p>
+<p>Apart from the &#8220;BUILD SUCCESS&#8221; message, you should also see a newly created folder by the name &#8220;target&#8221; for each of the directories above i.e. cloudera-kitten, panic and asap-platform if it did not already exist.</p>
+</div>
+<div class="section" id="update">
+<h3>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h3>
+<p>To run asap-server successfully and correctly, two things must be done. The first thing is to define the home folder of the ASAP server. The second one is to copy the cluster configuration files to the corresponding folder of the ASAP server.</p>
+<p>&#8211;&gt; As for the ASAP server&#8217;s home folder, the corresponding file</p>
+<p>$IRES_HOME/asap-platform/asap-server/src/main/scripts/asap-server</p>
+<p>should be updated. In this file the variable &#8220;ASAP_SERVER_HOME&#8221; should be assigned the path of the folder &#8220;asap-platform/asap-server/target&#8221; and thus under the line</p>
+<p>#IRES_HOME=/path/to/IReS-Platform_project</p>
+<p>set the IRES_HOME=</p>
+<p>to your custom IRES_HOME e.g.</p>
+<p>IRES_HOME=/home/$USER/asap/IReS-Platform</p>
+<p>Notice that the folder &#8220;$IRES_HOME/asap-platform/asap-server/target&#8221; has been created during the building phase.</p>
+<p>&#8211;&gt; As for the cluster configuration files, it is assumed that a YARN( or Hadoop 2.0) cluster is already set up and that YARN can be found for example in</p>
+<p>YARN=/home/$USER/yarn</p>
+<p>Copy the $YARN/etc/hadoop/core-site.xml and $YARN/etc/hadoop/yarn-site.xml files into the $IRES_HOME/asap-platform/asap-server/target/conf directory. Finally, the yarn-site.xml must have a minimum set of properties in order for the IReS-Platform to work correctly. This minimum set of properties can be found in resources/conf/yarn-site-min.xml file of this repository. Similarly for the core-site.xml file there is a core-site-min.xml into the same folder.</p>
+</div>
+</div>
+<div class="section" id="running-the-helloworld-workflow">
+<h2>Running the HelloWorld workflow<a class="headerlink" href="#running-the-helloworld-workflow" title="Permalink to this headline">¶</a></h2>
+<p>The HelloWorld is a simple workflow constists of just a single operator, designed for demonstration purposes. To run the HelloWolrd follow the next steps:</p>
+<ol class="arabic simple">
+<li>Go to IReS UI: <a class="reference external" href="http://localhost:1323/web/main">http://localhost:1323/web/main</a></li>
+</ol>
+<div class="figure" id="id1">
+<img alt="ireshome.png" src="ireshome.png" />
+<p class="caption"><span class="caption-text">IReS Home Page</span></p>
+</div>
+<ol class="arabic simple" start="2">
+<li>Go to the <strong>Abstract Workflows</strong> tab and select the <strong>HelloWorld</strong> workflow</li>
+</ol>
+<div class="figure" id="id2">
+<img alt="abstractworkflows.png" src="abstractworkflows.png" />
+<p class="caption"><span class="caption-text">Abstract Workflows Tab</span></p>
+</div>
+<ol class="arabic simple" start="3">
+<li>Then click on <strong>Materialize Workflow</strong> button</li>
+</ol>
+<div class="figure" id="id3">
+<img alt="abstracthello.png" src="abstracthello.png" />
+<p class="caption"><span class="caption-text">Abstract HelloWorld Workflow</span></p>
+</div>
+<ol class="arabic simple" start="4">
+<li>Click on the <strong>Execute Workflow</strong> button to start the execution</li>
+</ol>
+<div class="figure" id="id4">
+<img alt="materializedhello.png" src="materializedhello.png" />
+<p class="caption"><span class="caption-text">The materialized HelloWorld workflow</span></p>
+</div>
+<p>In the figures below we can see the execution process</p>
+<div class="figure" id="id5">
+<a class="reference internal image-reference" href="exec1.png"><img alt="exec1.png" src="exec1.png" style="width: 150%;" /></a>
+<p class="caption"><span class="caption-text">The execution has been started</span></p>
+</div>
+<div class="figure" id="id6">
+<a class="reference internal image-reference" href="yarn.png"><img alt="yarn.png" src="yarn.png" style="width: 150%;" /></a>
+<p class="caption"><span class="caption-text">The submitted YARN application</span></p>
+</div>
+<div class="figure" id="id7">
+<a class="reference internal image-reference" href="exec2.png"><img alt="exec2.png" src="exec2.png" style="width: 150%;" /></a>
+<p class="caption"><span class="caption-text">The execution has been finished</span></p>
+</div>
+</div>
+<div class="section" id="create-a-new-workflow-from-scratch">
+<h2>Create a new workflow from scratch<a class="headerlink" href="#create-a-new-workflow-from-scratch" title="Permalink to this headline">¶</a></h2>
+<p>In this section we describe the process of design a new workflow from scratch.</p>
+<div class="section" id="creating-abstract-operators">
+<h3>1. Creating Abstract Operators<a class="headerlink" href="#creating-abstract-operators" title="Permalink to this headline">¶</a></h3>
+<p>In order to create a new workflow the definition of the abstract operators is needed. To define the <strong>HelloWorld</strong> abstract operator go to the <strong>Abstract Operators</strong> tab and enter the operator description in the text box. To create and save the new abstract operator click the &#8220;Add operator&#8221; button.</p>
+<a class="reference internal image-reference" href="newabstractoperator.png"><img alt="newabstractoperator.png" src="newabstractoperator.png" style="width: 150%;" /></a>
+</div>
+<div class="section" id="creating-materialized-operators">
+<h3>2. Creating Materialized Operators<a class="headerlink" href="#creating-materialized-operators" title="Permalink to this headline">¶</a></h3>
+<p>Currently, to add a materialized operator a folder with the least required files is needed.</p>
+<ol class="lowerroman simple">
+<li>From the bash shell, go to the <strong>asapLibrary/operators</strong> folder in the IReS installation directory.</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>cd $ASAP_HOME/target/asapLibrary/operators
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="2">
+<li>Then, create a new folder named with the new materialized operator&#8217;s name.</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">HelloWorld</span>
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="3">
+<li>Create the <strong>description</strong> file and enter the information below</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ nano description
+</pre></div>
+</div>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>Constraints.Engine=Spark
+Constraints.Output.number=1
+Constraints.Input.number=1
+Constraints.OpSpecification.Algorithm.name=HelloWorld
+Optimization.model.execTime=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.model.cost=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.outputSpace.execTime=Double
+Optimization.outputSpace.cost=Double
+Optimization.cost=1.0
+Optimization.execTime=1.0
+Execution.Arguments.number=1
+Execution.Argument0=testout
+Execution.Output0.name=$HDFS_OP_DIR/testout
+Execution.copyFromLocal=testout
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="4">
+<li>Create the .lua file with the execution instructions</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">operator</span> <span class="o">=</span> <span class="n">yarn</span> <span class="p">{</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Execute Hello world&quot;</span><span class="p">,</span>
+  <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+  <span class="n">cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="n">container</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">instances</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="o">--</span><span class="n">env</span> <span class="o">=</span> <span class="n">base_env</span><span class="p">,</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">[</span><span class="s2">&quot;HelloWorld.sh&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;asapLibrary/operators/HelloWorld/HelloWorld.sh&quot;</span><span class="p">,</span>
+                <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>               <span class="o">--</span> <span class="n">other</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;archive&#39;</span>
+                <span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;application&quot;</span>  <span class="o">--</span> <span class="n">other</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;private&#39;</span><span class="p">,</span> <span class="s1">&#39;public&#39;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s2">&quot;./HelloWorld.sh&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="22">
+<li>Create the executable</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ nano HelloWorld.sh
+</pre></div>
+</div>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>#!/bin/bash
+echo &quot;Hello world&quot; &gt;&gt; $1
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="6">
+<li>Restart the IReS server</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ $IRES_HOME/asap-server/src/main/scripts/asap-server restart
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-the-abstract-workflow">
+<h3>3. Creating the Abstract Workflow<a class="headerlink" href="#creating-the-abstract-workflow" title="Permalink to this headline">¶</a></h3>
+<p>Now we will combine everything we created in the above steps to generate the new workflow. Go to the <strong>Abstract Workflows</strong> tab and click the &#8220;New Workflow&#8221; button.</p>
+<a class="reference internal image-reference" href="newworkflow1.png"><img alt="newworkflow1.png" src="newworkflow1.png" style="width: 150%;" /></a>
+<p>Then we add the workflow parts one-by-one. First we add the <strong>crawlDocuments</strong> dataset from the dataset library. Select the <strong>Materialized Dataset</strong> radio button and enter the dataset name in the <strong>Comma seperated list</strong> text box. Then click the <strong>Add nodes</strong> button to add the dataset node to the workflow graph. Repeat this step to add an output node with name <strong>d1</strong>. Just enter the name <strong>d1</strong> to the text box and click the <strong>Add nodes</strong> button.</p>
+<a class="reference internal image-reference" href="newworkflow2.png"><img alt="newworkflow2.png" src="newworkflow2.png" style="width: 150%;" /></a>
+<a class="reference internal image-reference" href="newworkflow3.png"><img alt="newworkflow3.png" src="newworkflow3.png" style="width: 150%;" /></a>
+<p>Add the <strong>HelloWorld</strong> abstract operator to the workflow. Select the <strong>Abstract Operator</strong> radio button, enter the operator&#8217;s name (HelloWold) in the text box and click again the <strong>Add nodes</strong> button.</p>
+<a class="reference internal image-reference" href="newworkflow4.png"><img alt="newworkflow4.png" src="newworkflow4.png" style="width: 150%;" /></a>
+<p>Describe the workflow by connecting the graph nodes defined in the previous steps as shown in the figure bellow and click the <strong>Change graph</strong> button.</p>
+<a class="reference internal image-reference" href="newworkflow5.png"><img alt="newworkflow5.png" src="newworkflow5.png" style="width: 150%;" /></a>
+<p>In the figure bellow we can see the generated <strong>Abstract Workflow</strong>. Now click the <strong>Materialize workflow</strong></p>
+<a class="reference internal image-reference" href="newworkflow6.png"><img alt="newworkflow6.png" src="newworkflow6.png" style="width: 150%;" /></a>
+<p>The resulting materialized workflow</p>
+<div class="figure">
+<img alt="materializedhello.png" src="materializedhello.png" />
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation &amp; Deployment</a><ul>
+<li><a class="reference internal" href="#installing-ires-platform">Installing IReS-Platform</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#build">Build</a></li>
+<li><a class="reference internal" href="#update">Update</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#running-the-helloworld-workflow">Running the HelloWorld workflow</a></li>
+<li><a class="reference internal" href="#create-a-new-workflow-from-scratch">Create a new workflow from scratch</a><ul>
+<li><a class="reference internal" href="#creating-abstract-operators">1. Creating Abstract Operators</a></li>
+<li><a class="reference internal" href="#creating-materialized-operators">2. Creating Materialized Operators</a></li>
+<li><a class="reference internal" href="#creating-the-abstract-workflow">3. Creating the Abstract Workflow</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Asap consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      
+      |
+      <a href="_sources/install.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
