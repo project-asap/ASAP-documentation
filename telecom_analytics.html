@@ -128,7 +128,34 @@
 <div class="section" id="user-profiling">
 <h2>User Profiling<a class="headerlink" href="#user-profiling" title="Permalink to this headline">¶</a></h2>
 <p>The spatio temporal profile is an aggregated representation of the presence of a user in a certain area of interest during different pre-defined timeslots. This profile is
-constructed starting from the CDR data and with reference to a particular spatial respresentation. The CDR spatial coverage describes the distribution of the antennas used by the mobile telecommunications operator on the territory, which can be used to estimate the corresponding coverage. A spatio temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR.</p>
+constructed starting from the CDR data and with reference to a particular spatial respresentation. The CDR spatial coverage describes the distribution of the antennas used by the mobile telecommunications operator on the territory, which can be used to estimate the corresponding coverage. A spatio temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. A spatio-temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. The idea is that if a person makes a call in the area A at time t, it means that he is present in that area at that time.</p>
+<div class="section" id="run-user-profiling">
+<h3>Run User Profiling<a class="headerlink" href="#run-user-profiling" title="Permalink to this headline">¶</a></h3>
+<p>Run:  $SPARK_HOME/bin/spark-submit &#8211;py-files cdr.py sociometer/user_profiling.py &lt;dataset&gt; &lt;spatial_division&gt; &lt;start_date&gt; &lt;end_date&gt;</p>
+<dl class="docutils">
+<dt>where:</dt>
+<dd><ul class="first last">
+<li><dl class="first docutils">
+<dt>dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:</dt>
+<dd><p class="first last">user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type where start_time column is expected to have this format: &#8216;%Y-%m-%d %X&#8217;.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">spatial_division: File containing the mapping of cells to regions.</p>
+</li>
+<li><p class="first">start_date: The starting date of the analysis (format: %Y-%m-%d)</p>
+</li>
+<li><p class="first">end_date: The ending date of the analysis (format: %Y-%m-%d)</p>
+</li>
+</ul>
+</dd>
+</dl>
+<p>The results are stored into hdfs: /peaks/profiles-&lt;start_week&gt;-&lt;end_week&gt; where start_week and end_week are the starting and the ending week (format: &lt;ISO_year&gt;_&lt;ISO_week&gt;) of the specific time window.</p>
+</div>
+</div>
+<div class="section" id="sociometer">
+<h2>Sociometer<a class="headerlink" href="#sociometer" title="Permalink to this headline">¶</a></h2>
+<p>It classifies the users using the presence of cellphone users. In particular, it identifies residents, commuters and visitors.  K-means identifies the representative profiles, which are then labeled with the mobility behavior categories just described. Several profiles might be associated to the same category, basically representing different facets of the same class of users. The classification phase assigns each spatio-temporal user’s profile to the closest representative profile based on a proper distance measure. The output is the semantic enrichment of the set of users with tags representing the classification for each user.</p>
 </div>
 </div>
 
@@ -146,7 +173,11 @@ constructed starting from the CDR data and with reference to a particular spatia
 <li><a class="reference internal" href="#run-peak-detection">Run Peak Detection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#user-profiling">User Profiling</a></li>
+<li><a class="reference internal" href="#user-profiling">User Profiling</a><ul>
+<li><a class="reference internal" href="#run-user-profiling">Run User Profiling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sociometer">Sociometer</a></li>
 </ul>
 </li>
 </ul>

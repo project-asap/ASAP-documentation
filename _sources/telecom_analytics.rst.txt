@@ -94,6 +94,29 @@ User Profiling
 ##############
 
 The spatio temporal profile is an aggregated representation of the presence of a user in a certain area of interest during different pre-defined timeslots. This profile is 
-constructed starting from the CDR data and with reference to a particular spatial respresentation. The CDR spatial coverage describes the distribution of the antennas used by the mobile telecommunications operator on the territory, which can be used to estimate the corresponding coverage. A spatio temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR.
+constructed starting from the CDR data and with reference to a particular spatial respresentation. The CDR spatial coverage describes the distribution of the antennas used by the mobile telecommunications operator on the territory, which can be used to estimate the corresponding coverage. A spatio temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. A spatio-temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. The idea is that if a person makes a call in the area A at time t, it means that he is present in that area at that time.
+
+
+Run User Profiling
+******************
+
+
+Run:  $SPARK_HOME/bin/spark-submit --py-files cdr.py sociometer/user_profiling.py <dataset> <spatial_division> <start_date> <end_date>
+
+where:
+	• dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:
+             user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type where start_time column is expected to have this format: '%Y-%m-%d %X'.
+    	• spatial_division: File containing the mapping of cells to regions.
+    	• start_date: The starting date of the analysis (format: %Y-%m-%d)
+    	• end_date: The ending date of the analysis (format: %Y-%m-%d)
+
+The results are stored into hdfs: /peaks/profiles-<start_week>-<end_week> where start_week and end_week are the starting and the ending week (format: <ISO_year>_<ISO_week>) of the specific time window.
+
+
+Sociometer
+##########
+
+It classifies the users using the presence of cellphone users. In particular, it identifies residents, commuters and visitors.  K-means identifies the representative profiles, which are then labeled with the mobility behavior categories just described. Several profiles might be associated to the same category, basically representing different facets of the same class of users. The classification phase assigns each spatio-temporal user’s profile to the closest representative profile based on a proper distance measure. The output is the semantic enrichment of the set of users with tags representing the classification for each user.
+
 
 
