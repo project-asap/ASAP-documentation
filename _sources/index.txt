@@ -1,22 +1,22 @@
-.. Asap documentation master file, created by
-   sphinx-quickstart on Mon Oct 24 12:35:47 2016.
+.. ASAP Documentation documentation master file, created by
+   sphinx-quickstart on Mon Oct 10 11:49:56 2016.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Asap's documentation!
-================================
+.. image:: figures/asap_logo.jpg
+
+Documentation
+=============
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   intro
+   wmt
+   ires_docs/ires_index
+   spark
+   swan
+   telecom_analytics
 

@@ -17,15 +17,12 @@
         VERSION:     '0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
     <link rel="top" title="Asap 0.0 documentation" href="../index.html" />
     <link rel="up" title="IReS" href="ires_index.html" />
     <link rel="next" title="Installation &amp; Deployment" href="install.html" />
@@ -66,7 +63,7 @@
 <p>This workflow, depicted in Figure 2, describes the process that takes place whenever a new materialized operator, accompanied by its metadata description, is added to the operator library of the IReS platform. This operator insertion triggers an offline profiling process to obtain knowledge about its behavior under different configurations.</p>
 <p>During profiling, a number of different operator configurations are adaptively selected by the profiler. The operator is then executed under these different setups and a number of  metrics  (currently  45)  are  monitored  in  order  to  train  and  create  accurate performance models. These metrics include: (a) execution time, (b) all the monitoring metrics reported by the ganglia2 monitoring tool (e.g., CPU, RAM, iops, network traffic etc.), (c) operator specific metrics (e.g., number of results, output size, etc.). Moreover, the developer can provide her own monitoring probes through a well-defined API. These models populate a knowledge base, Model DB, that can be used to facilitate the decision making process. Profiling is an iterative process, with configurations being selected dynamically, based on the accuracy of the model with respect to the so far collected measures. More details about the implementation of the profiling module follow in section 3.2. Figure 2 Profiling Workflow</p>
 <div class="figure" id="id2">
-<a class="reference internal image-reference" href="../_images/profiling.png"><img alt="../_images/profiling.png" src="../_images/profiling.png" style="width: 294.4px; height: 349.6px;" /></a>
+<a class="reference internal image-reference" href="../_images/profiling.png"><img alt="../_images/profiling.png" src="../_images/profiling.png" style="width: 294.40000000000003px; height: 349.6px;" /></a>
 <p class="caption"><span class="caption-text">Profiling Workflow</span></p>
 </div>
 </div>
@@ -120,7 +117,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/ires_docs/arch.rst.txt"
+      <li><a href="../_sources/ires_docs/arch.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -142,11 +139,11 @@
       &copy;2016, Asap consortium.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="../_sources/ires_docs/arch.rst.txt"
+      <a href="../_sources/ires_docs/arch.txt"
           rel="nofollow">Page source</a>
     </div>
 
