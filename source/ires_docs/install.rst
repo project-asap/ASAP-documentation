@@ -6,54 +6,92 @@ Installation & Deployment
 Installing IReS-Platform
 ========================
 
+------------
+Prerequisite
+------------
+
+To build the project, version 3 of maven is required because the previous version has bugs 
+with jetty and jersey packages. In Ubuntu just execute
+
+.. code-block:: bash
+
+   sudo apt-get install maven
+
+and confirm the maven version by running
+
+.. code-block:: bash
+
+  mvn -v
+
+For other systems, you can find relevant instructions on the Web.
+
 --------
 Overview
 --------
-Installation of IRes-Platform requires 3 steps
 
-1. Clone IReS-Platform to the server. For a quick reference of how to use git, click `here <https://rogerdudler.github.io/git-guide/>`_
+Installation of IRes-Platform requires the following steps:
 
-2. Build IReS-Platform project using maven. A tutorial about maven can be found here Maven Getting Started Guide. Update configuration files and folders appropriately.
-3. Clone: Open a terminal (Linux) or a cmd (Windows) and navigate to a desired directory (create it if does not exist) where IReS-Platform files will be cloned e.g. asap. In the github page of the IReS-Platform, https://github.com/project-asap/IReS-Platform, at the right sidebar, under the label "HTTPS clone URL" the clone url can be found. Copy this url and from inside the terminal execute the command ``git clone clone_url``
+  1. Clone the IReS-Platform code from the GitHub repository at https://github.com/project-asap/IReS-Platform. 
+     You need to install ``git`` first (`find here a quick reference of how to use git,  <https://rogerdudler.github.io/git-guide/>`_
+
+  2. Build IReS-Platform project using maven.
+  
+  3. Update some configuration files and folders appropriately.
+
 
 -----
 Build
 -----
 
-For demostration reasons a Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.
+A Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.
 
-The local home directory of the IReS-Platform project is
+In the following, ``IRES_HOME`` refers to the directory where the IReS code has been cloned, e.g., it can
+typically be ``/home/$USER/asap/IReS-Platform``. Please define this  variable in your ``bash`` environment.
 
-``IRES_HOME=/home/$USER/asap/IReS-Platform``
+.. code-block:: bash
 
-NOTE:
+     export IRES_HOME = <path-to-ires>
+     
+Some POM files has to be updated to refer to the currently installed YARN version. Navigate to $IRES_HOME folder and then
 
-the "$USER" part of the IRES_HOME corresponds to the currently logged in user
-it is assumed that the project has been cloned into the directory /home/$USER/asap
-to refer to the value of IRES_HOME the bash script variable notation is used i.e. $IRES_HOME
-To build the project use version 3 of maven because the previous version has bugs with jetty and jersey packages. In Ubuntu just execute
+  -  edit the  ``$IRES_HOME/asap-platform/pom.xml`` file. Find the line about ``hadoop.version`` 
+     and report the version number of the currently installed YARN version/ For instance,
+     if the Hadoop version is  2.7.3, the POM file should contain.
+     
+     .. code-block:: xml
+     
+          <hadoop.version>2.7.3</hadoop.version>
+ 
+  - edit the  ``$IRES_HOME/cloudera-kitten/pom.xml`` file and do the same change.
+   
+Then, navigate to the folder ``$IRES_HOME/panic`` and build this sub-project by runninng
 
-``sudo apt-get install maven``
+.. code-block:: bash
 
-and confirm the maven version by running
+     sudo mvn clean install -DskipTests
 
-``mvn -v``.
+Do the same for the ``$IRES_HOME/cloudera-kitten`` folder and 
+ignore the message "BUILD FAILURE" for the moment if that message occurs. 
 
-Then update IReS-Platform pom.xml files to point to the currently installed YARN version.
+.. code-block:: bash
 
-To do so, the pom.xml file of the asap-platform and cloudera-kitten folders should be updated in order for the Maven to take in account the currently YARN version installed during the building phase. To do so, navigate to $IRES_HOME folder and then
+     cd ../cloudera-kitten ;  sudo mvn clean install -DskipTests
+     
+Next, build similarly the ``$IRES_HOME/asap-platform`` folder and ingore again a 
+possible "BUILD FAILURE" message. 
 
-for the asap-platform edit the file $IRES_HOME/asap-platform/pom.xml. In particular, find the line about hadoop.version and between the tags write the version number of the currently installed YARN version e.g. 2.7.1 if the currently installed YARN is hadoop-2.7.1
-for the cloudera-kitten edit the file $IRES_HOME/cloudera-kitten/pom.xml. Again, find the line about hadoop.version and write the version number of the currently installed YARN version like before.
-Then, navigate to the folder $IRES_HOME/panic and build the corresponding project by runninng
+.. code-block:: bash
 
-``sudo mvn clean install -DskipTests``
+     cd ../asap-platform ;  sudo mvn clean install -DskipTests
 
-Do the same for the $IRES_HOME/cloudera-kitten folder and ignore the message "BUILD FAILURE" for the moment if that message occur. Now, build similarly the $IRES_HOME/asap-platform folder and ingore again a possible "BUILD FAILURE" message. Repeat the process for the last two folders with the same order i.e. first build $IRES_HOME/cloudera-kitten and afterwards build $IRES_HOME/asap-platform.
 
-In the end of each build you should see a "BUILD SUCCESS" message. The building order of the directories above should be followed.
+Repeat the process for the last two folders with the same order,
+i.e. first build ``$IRES_HOME/cloudera-kitten`` and afterwards build ``$IRES_HOME/asap-platform``.
+At the end, you should see a "BUILD SUCCESS" message. The building order of the directories above should be followed.
 
-Apart from the "BUILD SUCCESS" message, you should also see a newly created folder by the name "target" for each of the directories above i.e. cloudera-kitten, panic and asap-platform if it did not already exist.
+Apart from the "BUILD SUCCESS" message, you should also see a newly created 
+folder by the name ``target`` for each of the directories above i.e. 
+``panic``, ``cloudera-kitten``, and ``asap-platform`` if it did not already exist.
 
 ------
 Update
@@ -61,7 +99,7 @@ Update
 
 To run asap-server successfully and correctly, two things must be done. The first thing is to define the home folder of the ASAP server. The second one is to copy the cluster configuration files to the corresponding folder of the ASAP server.
 
---> As for the ASAP server's home folder, the corresponding file
+As for the ASAP server's home folder, the corresponding file
 
 $IRES_HOME/asap-platform/asap-server/src/main/scripts/asap-server
 
@@ -84,9 +122,9 @@ YARN=/home/$USER/yarn
 Copy the $YARN/etc/hadoop/core-site.xml and $YARN/etc/hadoop/yarn-site.xml files into the $IRES_HOME/asap-platform/asap-server/target/conf directory. Finally, the yarn-site.xml must have a minimum set of properties in order for the IReS-Platform to work correctly. This minimum set of properties can be found in resources/conf/yarn-site-min.xml file of this repository. Similarly for the core-site.xml file there is a core-site-min.xml into the same folder.
 
 
-================================
+===============================
 Running the HelloWorld workflow
-================================
+===============================
 
 The HelloWorld is a simple workflow constists of just a single operator, designed for demonstration purposes. To run the HelloWolrd follow the next steps:
 
@@ -133,24 +171,24 @@ In the figures below we can see the execution process
 
 
 
-===================================
+==================================
 Create a new workflow from scratch
-===================================
+==================================
 
 In this section we describe the process of design a new workflow from scratch.
 
---------------------------------
+------------------------------
 1. Creating Abstract Operators
---------------------------------
+------------------------------
 
 In order to create a new workflow the definition of the abstract operators is needed. To define the **HelloWorld** abstract operator go to the **Abstract Operators** tab and enter the operator description in the text box. To create and save the new abstract operator click the "Add operator" button.
 
 .. image:: newabstractoperator.png
    :width: 150%
 
------------------------------------
+----------------------------------
 2. Creating Materialized Operators
------------------------------------
+----------------------------------
 
 Currently, to add a materialized operator a folder with the least required files is needed. 
 
@@ -234,9 +272,9 @@ vi. Restart the IReS server
 	
 	$ $IRES_HOME/asap-server/src/main/scripts/asap-server restart
 
------------------------------------
+---------------------------------
 3. Creating the Abstract Workflow
------------------------------------
+---------------------------------
 
 Now we will combine everything we created in the above steps to generate the new workflow. Go to the **Abstract Workflows** tab and click the "New Workflow" button.
 
