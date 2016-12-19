@@ -17,12 +17,15 @@
         VERSION:     '0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
     <link rel="top" title="Asap 0.0 documentation" href="../index.html" />
     <link rel="up" title="IReS" href="ires_index.html" />
     <link rel="next" title="Extension of Apache Spark" href="../spark.html" />
@@ -118,28 +121,7 @@ paths or details about staging in/out files from containers that use their local
 </div>
 <div class="section" id="operator-metadata-description">
 <h3>Operator metadata description<a class="headerlink" href="#operator-metadata-description" title="Permalink to this headline">¶</a></h3>
-<p>In this section, we give an example of a materialized operator description (Figure 5).</p>
-<div class="line-block">
-<div class="line">Constraints.Input.number=1</div>
-<div class="line">Constraints.Output.number=1</div>
-<div class="line">Constraints.Input0.Engine.FS=HDFS</div>
-<div class="line">Constraints.Input0.type=SequenceFile</div>
-<div class="line">Constraints.Output0.Engine.FS=HDFS</div>
-<div class="line">Constraints.Output0.type=SequenceFile</div>
-<div class="line">Constraints.OpSpecification.Algorithm.name=TF_IDF</div>
-<div class="line">Constraints.EngineSpecification.Distributed.MapReduce.masterLocation=127.0.0.1</div>
-<div class="line">Optimization.inputSpace.In0.documents=Double,100.0,150000.0,10000.0</div>
-<div class="line">Optimization.outputSpace.execTime=Double</div>
-<div class="line">Optimization.outputSpace.Out0.points=Integer</div>
-<div class="line">Optimization.outputSpace.cost=Double</div>
-<div class="line">Optimization.model.execTime=gr.ntua.ece.cslab.panic.core.models.AbstractWekaModel</div>
-<div class="line">Optimization.model.Out0.points=gr.ntua.ece.cslab.panic.core.models.UserFunction</div>
-<div class="line">Optimization.Out0.points=In0.documents</div>
-<div class="line">Optimization.model.cost=gr.ntua.ece.cslab.panic.core.models.UserFunction</div>
-<div class="line">Optimization.cost=15.0 Execution.LuaScript=TF_IDF_mahout.lua Execution.Arguments.number=2</div>
-<div class="line">Execution.Argument0=In0.path Execution.Argument1=$HDFS_OP_DIR/tfidf</div>
-<div class="line">Execution.Output0.path=$HDFS_OP_DIR/tfidf</div>
-</div>
+<p>In this section, we give an example of a materialized operator description. We also provide a <a class="reference external" href="./files/description_template">template</a> of an operator description file.</p>
 <div class="figure" id="id4">
 <img alt="../_images/materializedop.png" src="../_images/materializedop.png" />
 <p class="caption"><span class="caption-text">Materialized Operator Description</span></p>
@@ -317,7 +299,7 @@ CP = &#8220;/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoo
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/ires_docs/implementation.txt"
+      <li><a href="../_sources/ires_docs/implementation.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -339,11 +321,11 @@ CP = &#8220;/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoo
       &copy;2016, Asap consortium.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.6</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="../_sources/ires_docs/implementation.txt"
+      <a href="../_sources/ires_docs/implementation.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 
