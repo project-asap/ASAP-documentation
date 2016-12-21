@@ -49,145 +49,117 @@
 <h1>Installation &amp; Deployment<a class="headerlink" href="#installation-deployment" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="installing-ires-platform">
 <h2>Installing IReS-Platform<a class="headerlink" href="#installing-ires-platform" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="prerequisite">
-<h3>Prerequisite<a class="headerlink" href="#prerequisite" title="Permalink to this headline">¶</a></h3>
-<p>To build the project, version 3 of maven is required because the previous version has bugs
-with jetty and jersey packages. In Ubuntu just execute</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get install maven
-</pre></div>
-</div>
-<p>and confirm the maven version by running</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mvn -v
-</pre></div>
-</div>
-<p>For other systems, you can find relevant instructions on the Web.</p>
-</div>
 <div class="section" id="overview">
 <h3>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h3>
-<p>Installation of IRes-Platform requires the following steps:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>Clone the IReS-Platform code from the GitHub repository at <a class="reference external" href="https://github.com/project-asap/IReS-Platform">https://github.com/project-asap/IReS-Platform</a>.
-You need to install <code class="docutils literal"><span class="pre">git</span></code> first (<a class="reference external" href="https://rogerdudler.github.io/git-guide/">find here a quick reference of how to use git,</a></li>
-<li>Build IReS-Platform project using maven.</li>
-<li>Update some configuration files and folders appropriately.</li>
-</ol>
-</div></blockquote>
+<p>Installation of IRes-Platform requires 3 steps</p>
 </div>
-<div class="section" id="build">
-<h3>Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h3>
-<p>A Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.</p>
-<p>In the following, <code class="docutils literal"><span class="pre">IRES_HOME</span></code> refers to the directory where the IReS code has been cloned, e.g., it can
-typically be <code class="docutils literal"><span class="pre">/home/$USER/asap/IReS-Platform</span></code>. Please define this  variable in your <code class="docutils literal"><span class="pre">bash</span></code> environment.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">IRES_HOME</span> <span class="o">=</span> &lt;path-to-ires&gt;
+<div class="section" id="clone-ires-platform-to-the-server">
+<h3>Clone IReS-Platform to the server<a class="headerlink" href="#clone-ires-platform-to-the-server" title="Permalink to this headline">¶</a></h3>
+<p>For a quick reference of how to use git, click <a class="reference external" href="https://rogerdudler.github.io/git-guide/">here</a>.
+Open a terminal (Linux) and navigate to a desired directory where IReS-Platform files will be cloned e.g. asap. Then, clone the project by entering the following command</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">project</span><span class="o">-</span><span class="n">asap</span><span class="o">/</span><span class="n">IReS</span><span class="o">-</span><span class="n">Platform</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
-<p>Some POM files has to be updated to refer to the currently installed YARN version. Navigate to $IRES_HOME folder and then</p>
-<blockquote>
-<div><ul>
-<li><p class="first">edit the  <code class="docutils literal"><span class="pre">$IRES_HOME/asap-platform/pom.xml</span></code> file. Find the line about <code class="docutils literal"><span class="pre">hadoop.version</span></code>
-and report the version number of the currently installed YARN version/ For instance,
-if the Hadoop version is  2.7.3, the POM file should contain.</p>
-<div class="highlight-xml"><div class="highlight"><pre><span></span><span class="nt">&lt;hadoop.version&gt;</span>2.7.3<span class="nt">&lt;/hadoop.version&gt;</span>
+</div>
+<div class="section" id="run-install-sh">
+<h3>Run install.sh<a class="headerlink" href="#run-install-sh" title="Permalink to this headline">¶</a></h3>
+<p>After successful cloning of IReS-Platform inside the $IRES_HOME various folders and files can be found. Among them there exists install.sh.</p>
+<p>You can run install.sh from any directory you would like. Here for demnostration reasons is assumed that the current working directory is $IRES_HOME. Executing,</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span>
 </pre></div>
 </div>
-</li>
-<li><p class="first">edit the  <code class="docutils literal"><span class="pre">$IRES_HOME/cloudera-kitten/pom.xml</span></code> file and do the same change.</p>
-</li>
-</ul>
-</div></blockquote>
-<p>Then, navigate to the folder <code class="docutils literal"><span class="pre">$IRES_HOME/panic</span></code> and build this sub-project by runninng</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo mvn clean install -DskipTests
+<p>will start building IReS-Platform. Upon successful building you will be prompted to provide the path where Hadoop YARN is located in your computer. By doing this, IReS gets connected with Hadoop YARN. You can skip this step and the installation will be finished.</p>
+<p>NOTE: if you do not provide an existing YARN installation, then IReS will not be able to execute any workflow. Also, resources and cluster services monitoring will not be functioning.
+you can provide YARN installation path afterwards as it will be shown straight ahead.
+Connecting IReS to Hadoop YARN</p>
+<p>Executing,</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>./install.sh -c $YARN_HOME,$IRES_HOME
 </pre></div>
 </div>
-<p>Do the same for the <code class="docutils literal"><span class="pre">$IRES_HOME/cloudera-kitten</span></code> folder and
-ignore the message &#8220;BUILD FAILURE&#8221; for the moment if that message occurs.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../cloudera-kitten <span class="p">;</span>  sudo mvn clean install -DskipTests
+<p>will make the connection of IReS and YARN, where $YARN_HOME and $IRES_HOME correspond to the absolute paths of YARN&#8217;s and IReS&#8217;s home folder.
+Cluster Monitoring</p>
+<p>This step requires the connection of IReS with YARN. Assuming that this connections has been established, then the user should update the file</p>
+<p>$YARN_HOME/etc/hadoop/yarn-site.xml</p>
+<p>and more specifically the values of the following properties,</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">yarn</span><span class="o">.</span><span class="n">nodemanager</span><span class="o">.</span><span class="n">services</span><span class="o">-</span><span class="n">running</span><span class="o">.</span><span class="n">per</span><span class="o">-</span><span class="n">node</span>
+<span class="n">yarn</span><span class="o">.</span><span class="n">nodemanager</span><span class="o">.</span><span class="n">services</span><span class="o">-</span><span class="n">running</span><span class="o">.</span><span class="n">check</span><span class="o">-</span><span class="n">availability</span>
+<span class="n">yarn</span><span class="o">.</span><span class="n">nodemanager</span><span class="o">.</span><span class="n">services</span><span class="o">-</span><span class="n">running</span><span class="o">.</span><span class="n">check</span><span class="o">-</span><span class="n">status</span>
 </pre></div>
 </div>
-<p>Next, build similarly the <code class="docutils literal"><span class="pre">$IRES_HOME/asap-platform</span></code> folder and ingore again a
-possible &#8220;BUILD FAILURE&#8221; message.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> ../asap-platform <span class="p">;</span>  sudo mvn clean install -DskipTests
+<p>These properties and some others have been added during the connection of IReS and YARN to enable IReS run workflows over YARN and cluster resources and services monitoring. Although details about filling these values are provided into $YARN_HOME/etc/hadoop/yarn-site.xml, roughly speaking, yarn.nodemanager.services-running.per-node property describes the cluster services running per node. The property, yarn.nodemanager.services-running.check-availability provides the commands per service that &#8220;tell&#8221; if the relative service runs or not. Finally, the property yarn.nodemanager.services-running.check-status has the statuses per service that the corresponding service has when it runs.</p>
+</div>
+<div class="section" id="validate-installation">
+<h3>Validate installation<a class="headerlink" href="#validate-installation" title="Permalink to this headline">¶</a></h3>
+<p>Here are some tips to confirm IReS installation.</p>
+<p>If anything goes wrong during the build process of IReS, error messages will be print out and a log file will be provided.</p>
+</div>
+<div class="section" id="start-the-ires-server">
+<h3>Start the IReS server<a class="headerlink" href="#start-the-ires-server" title="Permalink to this headline">¶</a></h3>
+<p>Run IReS server by running the command</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span> <span class="o">-</span><span class="n">r</span> <span class="n">start</span>
 </pre></div>
 </div>
-<p>Repeat the process for the last two folders with the same order,
-i.e. first build <code class="docutils literal"><span class="pre">$IRES_HOME/cloudera-kitten</span></code> and afterwards build <code class="docutils literal"><span class="pre">$IRES_HOME/asap-platform</span></code>.
-At the end, you should see a &#8220;BUILD SUCCESS&#8221; message. The building order of the directories above should be followed.</p>
-<p>Apart from the &#8220;BUILD SUCCESS&#8221; message, you should also see a newly created
-folder by the name <code class="docutils literal"><span class="pre">target</span></code> for each of the directories above i.e.
-<code class="docutils literal"><span class="pre">panic</span></code>, <code class="docutils literal"><span class="pre">cloudera-kitten</span></code>, and <code class="docutils literal"><span class="pre">asap-platform</span></code> if it did not already exist.</p>
-</div>
-<div class="section" id="update">
-<h3>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h3>
-<p>To run asap-server successfully and correctly, two things must be done. The first thing is to define the home folder of the ASAP server. The second one is to copy the cluster configuration files to the corresponding folder of the ASAP server.</p>
-<p>As for the ASAP server&#8217;s home folder, the corresponding file</p>
-<p>$IRES_HOME/asap-platform/asap-server/src/main/scripts/asap-server</p>
-<p>should be updated. In this file the variable &#8220;ASAP_SERVER_HOME&#8221; should be assigned the path of the folder &#8220;asap-platform/asap-server/target&#8221; and thus under the line</p>
-<p>#IRES_HOME=/path/to/IReS-Platform_project</p>
-<p>set the IRES_HOME=</p>
-<p>to your custom IRES_HOME e.g.</p>
-<p>IRES_HOME=/home/$USER/asap/IReS-Platform</p>
-<p>Notice that the folder &#8220;$IRES_HOME/asap-platform/asap-server/target&#8221; has been created during the building phase.</p>
-<p>&#8211;&gt; As for the cluster configuration files, it is assumed that a YARN( or Hadoop 2.0) cluster is already set up and that YARN can be found for example in</p>
-<p>YARN=/home/$USER/yarn</p>
-<p>Copy the $YARN/etc/hadoop/core-site.xml and $YARN/etc/hadoop/yarn-site.xml files into the $IRES_HOME/asap-platform/asap-server/target/conf directory. Finally, the yarn-site.xml must have a minimum set of properties in order for the IReS-Platform to work correctly. This minimum set of properties can be found in resources/conf/yarn-site-min.xml file of this repository. Similarly for the core-site.xml file there is a core-site-min.xml into the same folder.</p>
+<p>No exception should be raised. Also, the jps command should print a &#8220;Main&#8221; process running that corresponds to ASAP server.
+Run ASAP server web user interface at <a class="reference external" href="http://your_hostname:1323/web/main">http://your_hostname:1323/web/main</a>. IReS home page should be displayed.
+Run a workflow, for example run &#8220;hello_world&#8221; from &#8220;Abstrack Workflows&#8221; tab and see what happens not only in IReS web interface but also in YARN and HDFS web interfaces. Make sure that YARN has been started before running any workflow.
+Click on &#8220;Cockpit&#8221; tab to verify that the expected services to run are really running.</p>
 </div>
 </div>
 <div class="section" id="running-the-helloworld-workflow">
 <h2>Running the HelloWorld workflow<a class="headerlink" href="#running-the-helloworld-workflow" title="Permalink to this headline">¶</a></h2>
 <p>The HelloWorld is a simple workflow constists of just a single operator, designed for demonstration purposes. To run the HelloWolrd follow the next steps:</p>
 <ol class="arabic simple">
-<li>Go to IReS UI: <a class="reference external" href="http://localhost:1323/web/main">http://localhost:1323/web/main</a></li>
+<li>Go to IReS UI: <a class="reference external" href="http://ires_host:1323/web/main">http://ires_host:1323/web/main</a></li>
 </ol>
-<div class="figure" id="id1">
+<div class="figure" id="id6">
 <img alt="../_images/ireshome.png" src="../_images/ireshome.png" />
 <p class="caption"><span class="caption-text">IReS Home Page</span></p>
 </div>
 <ol class="arabic simple" start="2">
 <li>Go to the <strong>Abstract Workflows</strong> tab and select the <strong>HelloWorld</strong> workflow</li>
 </ol>
-<div class="figure" id="id2">
+<div class="figure" id="id7">
 <img alt="../_images/abstractworkflows.png" src="../_images/abstractworkflows.png" />
 <p class="caption"><span class="caption-text">Abstract Workflows Tab</span></p>
 </div>
 <ol class="arabic simple" start="3">
 <li>Then click on <strong>Materialize Workflow</strong> button</li>
 </ol>
-<div class="figure" id="id3">
+<div class="figure" id="id8">
 <img alt="../_images/abstracthello.png" src="../_images/abstracthello.png" />
 <p class="caption"><span class="caption-text">Abstract HelloWorld Workflow</span></p>
 </div>
 <ol class="arabic simple" start="4">
 <li>Click on the <strong>Execute Workflow</strong> button to start the execution</li>
 </ol>
-<div class="figure" id="id4">
+<div class="figure" id="id9">
 <img alt="../_images/materializedhello.png" src="../_images/materializedhello.png" />
 <p class="caption"><span class="caption-text">The materialized HelloWorld workflow</span></p>
 </div>
 <p>In the figures below we can see the execution process</p>
-<div class="figure" id="id5">
+<div class="figure" id="id10">
 <a class="reference internal image-reference" href="../_images/exec1.png"><img alt="../_images/exec1.png" src="../_images/exec1.png" style="width: 150%;" /></a>
 <p class="caption"><span class="caption-text">The execution has been started</span></p>
 </div>
-<div class="figure" id="id6">
+<div class="figure" id="id11">
 <a class="reference internal image-reference" href="../_images/yarn.png"><img alt="../_images/yarn.png" src="../_images/yarn.png" style="width: 150%;" /></a>
 <p class="caption"><span class="caption-text">The submitted YARN application</span></p>
 </div>
-<div class="figure" id="id7">
+<div class="figure" id="id12">
 <a class="reference internal image-reference" href="../_images/exec2.png"><img alt="../_images/exec2.png" src="../_images/exec2.png" style="width: 150%;" /></a>
 <p class="caption"><span class="caption-text">The execution has been finished</span></p>
 </div>
 </div>
-<div class="section" id="create-a-new-workflow-from-scratch">
-<h2>Create a new workflow from scratch<a class="headerlink" href="#create-a-new-workflow-from-scratch" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-the-helloworld-workflow-from-scratch-ui">
+<h2>Create the HelloWorld workflow from scratch (UI)<a class="headerlink" href="#create-the-helloworld-workflow-from-scratch-ui" title="Permalink to this headline">¶</a></h2>
 <p>In this section we describe the process of design a new workflow from scratch.</p>
 <div class="section" id="creating-abstract-operators">
 <h3>1. Creating Abstract Operators<a class="headerlink" href="#creating-abstract-operators" title="Permalink to this headline">¶</a></h3>
 <p>In order to create a new workflow the definition of the abstract operators is needed. To define the <strong>HelloWorld</strong> abstract operator go to the <strong>Abstract Operators</strong> tab and enter the operator description in the text box. To create and save the new abstract operator click the &#8220;Add operator&#8221; button.</p>
 <a class="reference internal image-reference" href="../_images/newabstractoperator.png"><img alt="../_images/newabstractoperator.png" src="../_images/newabstractoperator.png" style="width: 150%;" /></a>
 </div>
-<div class="section" id="creating-materialized-operators">
-<h3>2. Creating Materialized Operators<a class="headerlink" href="#creating-materialized-operators" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="creating-materialized-operators-server-side">
+<h3>2. Creating Materialized Operators (Server-side)<a class="headerlink" href="#creating-materialized-operators-server-side" title="Permalink to this headline">¶</a></h3>
 <p>Currently, to add a materialized operator a folder with the least required files is needed.</p>
 <ol class="lowerroman simple">
 <li>From the bash shell, go to the <strong>asapLibrary/operators</strong> folder in the IReS installation directory.</li>
@@ -219,13 +191,16 @@ Optimization.cost=1.0
 Optimization.execTime=1.0
 Execution.Arguments.number=1
 Execution.Argument0=testout
-Execution.Output0.name=$HDFS_OP_DIR/testout
+Execution.Output0.path=$HDFS_OP_DIR/testout
 Execution.copyFromLocal=testout
 </pre></div>
 </div>
 <ol class="lowerroman simple" start="4">
 <li>Create the .lua file with the execution instructions</li>
 </ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ nano HelloWorld.lua
+</pre></div>
+</div>
 <div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">operator</span> <span class="o">=</span> <span class="n">yarn</span> <span class="p">{</span>
   <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Execute Hello world&quot;</span><span class="p">,</span>
   <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
@@ -265,8 +240,64 @@ echo &quot;Hello world&quot; &gt;&gt; $1
 </pre></div>
 </div>
 </div>
+<div class="section" id="creating-materialized-operators-client-side-via-the-rest-api">
+<h3>3. Creating Materialized Operators (Client-side via the REST API)<a class="headerlink" href="#creating-materialized-operators-client-side-via-the-rest-api" title="Permalink to this headline">¶</a></h3>
+<p>As an alternative of section 2, a new materialized operator can be added using the provided REST API. This can be done by using the <cite>addTarball</cite> method of the <a class="reference external" href="./rest_api">REST API</a>. The steps are similar with these of section 2.</p>
+<ol class="lowerroman simple">
+<li>Create a folder for the new operator (name does not matters)</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">mkdir</span> <span class="n">operator</span>
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="2">
+<li>Navigate to the new folder</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">operator</span>
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="3">
+<li>Create the <strong>description</strong> file and enter the information below. By adding the new operator via <cite>addTarball</cite> method there is no need of creating a .lua file as it will be generated automatically. In such a case, three more parameters should be added in the <cite>Execution</cite> tree. These parameters are <cite>cores</cite>, <cite>memory</cite> and <cite>command</cite>.</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$ nano description
+</pre></div>
+</div>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>Constraints.Engine=Spark
+Constraints.Output.number=1
+Constraints.Input.number=1
+Constraints.OpSpecification.Algorithm.name=HelloWorld
+Optimization.model.execTime=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.model.cost=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.outputSpace.execTime=Double
+Optimization.outputSpace.cost=Double
+Optimization.cost=1.0
+Optimization.execTime=1.0
+Execution.Arguments.number=1
+Execution.Argument0=testout
+Execution.Output0.path=$HDFS_OP_DIR/testout
+Execution.copyFromLocal=testout
+####Extra Execution Parameters###
+Execution.cores=1
+Execution.memory=1024
+Execution.command=./HelloWorld.sh
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="4">
+<li>Put all files in the current directory in a compress (tar.gz) file:</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">tar</span> <span class="o">-</span><span class="n">cvf</span> <span class="n">helloworld</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">gz</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>this command must be executed inside the operator&#8217;s folder. The corresponding folder in IReS server will be created automatically.</p>
+<ol class="loweralpha simple" start="22">
+<li>Send the tarball via the REST API using curl:</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>curl -H &quot;Content-Type: application/octet-stream&quot; -X POST --data-binary @helloworld.tar.gz ires_host:1323/operators/addTarball?opname=HelloWorld
+</pre></div>
+</div>
+<p>The tarball for this example is available <a class="reference external" href="./files/helloworld.tar.gz">here</a>.</p>
+</div>
 <div class="section" id="creating-the-abstract-workflow">
-<h3>3. Creating the Abstract Workflow<a class="headerlink" href="#creating-the-abstract-workflow" title="Permalink to this headline">¶</a></h3>
+<h3>4. Creating the Abstract Workflow<a class="headerlink" href="#creating-the-abstract-workflow" title="Permalink to this headline">¶</a></h3>
 <p>Now we will combine everything we created in the above steps to generate the new workflow. Go to the <strong>Abstract Workflows</strong> tab and click the &#8220;New Workflow&#8221; button.</p>
 <a class="reference internal image-reference" href="../_images/newworkflow1.png"><img alt="../_images/newworkflow1.png" src="../_images/newworkflow1.png" style="width: 150%;" /></a>
 <p>Then we add the workflow parts one-by-one. First we add the <strong>crawlDocuments</strong> dataset from the dataset library. Select the <strong>Materialized Dataset</strong> radio button and enter the dataset name in the <strong>Comma seperated list</strong> text box. Then click the <strong>Add nodes</strong> button to add the dataset node to the workflow graph. Repeat this step to add an output node with name <strong>d1</strong>. Just enter the name <strong>d1</strong> to the text box and click the <strong>Add nodes</strong> button.</p>
@@ -284,6 +315,282 @@ echo &quot;Hello world&quot; &gt;&gt; $1
 </div>
 </div>
 </div>
+<div class="section" id="create-an-input-process-output-workflow">
+<h2>Create an input-process-output workflow<a class="headerlink" href="#create-an-input-process-output-workflow" title="Permalink to this headline">¶</a></h2>
+<p>In this example we will create a workflow consists of a single operator which takes as input a text file and produces as output the number of lines.</p>
+<div class="section" id="dataset-definition">
+<h3>Dataset definition<a class="headerlink" href="#dataset-definition" title="Permalink to this headline">¶</a></h3>
+<p>In order to create the workflow input dataset you need to add the dataset definition into IReS library. Create a file named &#8216;asapServerLog&#8217; into the asapLibrary/datasets/ folder and add the following content:</p>
+<div class="code highlight-default"><div class="highlight"><pre><span></span><span class="n">Optimization</span><span class="o">.</span><span class="n">documents</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Execution</span><span class="o">.</span><span class="n">path</span><span class="o">=</span><span class="n">hdfs</span>\<span class="p">:</span><span class="o">///</span><span class="n">user</span><span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">asap</span><span class="o">-</span><span class="n">server</span><span class="o">.</span><span class="n">log</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Engine</span><span class="o">.</span><span class="n">FS</span><span class="o">=</span><span class="n">HDFS</span>
+</pre></div>
+</div>
+<p>This step assumes that a file named &#8216;asap-server.log&#8217; exists in the HDFS. You can download the log file used in this example <a class="reference external" href="./files/asap-server.log">through this link</a>.</p>
+</div>
+<div class="section" id="materialized-operator-definition-via-rest">
+<h3>Materialized Operator Definition (via REST)<a class="headerlink" href="#materialized-operator-definition-via-rest" title="Permalink to this headline">¶</a></h3>
+<p>Create a folder locally and add the required <cite>description</cite> file as well as all other files needed for the exeuction.</p>
+<ol class="lowerroman simple">
+<li>description file: Create inside the folder a file named <cite>description</cite> with the following content:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>Constraints.Engine=Spark
+Constraints.Output.number=1
+Constraints.Input.number=1
+Constraints.OpSpecification.Algorithm.name=LineCount
+Optimization.model.execTime=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.model.cost=gr.ntua.ece.cslab.panic.core.models.UserFunction
+Optimization.outputSpace.execTime=Double
+Optimization.outputSpace.cost=Double
+Optimization.cost=1.0
+Optimization.execTime=1.0
+Execution.Arguments.number=2
+Execution.Argument0=In0.path.local
+Execution.Argument1=lines.out
+Execution.Output0.path=$HDFS_OP_DIR/lines.out
+Execution.copyFromLocal=lines.out
+Execution.copyToLocal=In0.path
+Execution.command=./count_lines.sh
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="2">
+<li>executable file: Create the executable named &#8216;count_lines.sh&#8217; with the following content:</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>#!/bin/bash
+wc -l $1 &gt;&gt; $2
+</pre></div>
+</div>
+<p>and make it executable</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">count_lines</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+<ol class="lowerroman simple" start="3">
+<li>Send the operator via the &#8216;send_operator.sh&#8217; script:</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">send_operator</span><span class="o">.</span><span class="n">sh</span> <span class="n">LOCAL_OP_FOLDER</span> <span class="n">IRES_HOST</span> <span class="n">LineCount</span>
+</pre></div>
+</div>
+<p>The script is available at $IRES_HOME/asap-server/src/main/scripts. You can also <a class="reference external" href="https://github.com/project-asap/IReS-Platform/blob/master/asap-platform/asap-server/src/main/scripts/send_operator.sh">download it directly</a>.</p>
+</div>
+<div class="section" id="abstract-operator-definition">
+<h3>Abstract operator definition<a class="headerlink" href="#abstract-operator-definition" title="Permalink to this headline">¶</a></h3>
+<p>Create the <cite>LineCount</cite> abstract operator by creating a file named &#8216;LineCount&#8217; in the asapLibrary/abstractOperators folder with the following content:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">Constraints</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Input</span><span class="o">.</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">OpSpecification</span><span class="o">.</span><span class="n">Algorithm</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">LineCount</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="abstract-workflow-definition">
+<h3>Abstract workflow definition<a class="headerlink" href="#abstract-workflow-definition" title="Permalink to this headline">¶</a></h3>
+<p>Create the <cite>LineCountWorkflow</cite> workflow by creating a folder named &#8216;LineCountWorkflow&#8217; in the asapLibrary/abstractWorkflows. The abstract workflow folder should consist of three required components: the <cite>datasets</cite> folder , the <cite>operators</cite> folder and a file named <cite>graph</cite>.</p>
+<ol class="lowerroman simple">
+<li>datasets: Create a folder named &#8216;datasets&#8217; and copy the <cite>asapServerLog</cite> file from the <cite>asapLibrary/datasets/</cite> folder into it. Then, create an empty file named &#8216;d1&#8217; (touch d1).</li>
+<li>graph: Create a file named &#8216;graph&#8217; and add the following content:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>asapServerLog,LineCount,0
+LineCount,d1,0
+d1,$$target
+</pre></div>
+</div>
+<p>This <cite>graph</cite> file defines the workflow graph as follows: <cite>asapServerLog</cite> dataset is being given as input to the <cite>LineCount</cite> abstract operator and <cite>LineCount</cite> operator outputs the result into <cite>d1</cite>. Finally, <cite>d1</cite> node maps to the final result ($$target).</p>
+<ol class="lowerroman simple" start="3">
+<li>operators: Create a folder named &#8216;operators&#8217; which will contain the operators involved in the worflow. In the &#8216;operators&#8217; folder create a file named &#8216;LineCount&#8217; and add the following content:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">Constraints</span><span class="o">.</span><span class="n">Engine</span><span class="o">=</span><span class="n">Spark</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Input</span><span class="o">.</span><span class="n">number</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">OpSpecification</span><span class="o">.</span><span class="n">Algorithm</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">LineCount</span>
+</pre></div>
+</div>
+<p>Restart the server for changes to take effect.</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span>$IRES_HOME/asap-platform/asap-server/src/main/scripts/asap-server restart
+</pre></div>
+</div>
+</div>
+<div class="section" id="workflow-materialization">
+<h3>Workflow Materialization<a class="headerlink" href="#workflow-materialization" title="Permalink to this headline">¶</a></h3>
+<p>To materialize the workflow navigate to the <cite>Abstract Workflows</cite> tab and click on the LineCountWorkflow created in the previous steps.</p>
+<a class="reference internal image-reference" href="../_images/abstractLineCount.png"><img alt="../_images/abstractLineCount.png" src="../_images/abstractLineCount.png" style="width: 150%;" /></a>
+<p>Click on the <cite>Materialize Workflow</cite> button</p>
+<a class="reference internal image-reference" href="../_images/lineCountMaterialized.png"><img alt="../_images/lineCountMaterialized.png" src="../_images/lineCountMaterialized.png" style="width: 150%;" /></a>
+<p>Now you can see the materialized LineCount workflow. Click on <cite>Execute Workflow</cite> button to trigger the execution</p>
+<a class="reference internal image-reference" href="../_images/lineCountExecution.png"><img alt="../_images/lineCountExecution.png" src="../_images/lineCountExecution.png" style="width: 150%;" /></a>
+<p>When the execution finish, navigate to the HDFS file browser to see the output located at appN folder.</p>
+<a class="reference internal image-reference" href="../_images/lineCountHDFS.png"><img alt="../_images/lineCountHDFS.png" src="../_images/lineCountHDFS.png" style="width: 150%;" /></a>
+<p>All resources and examples files described in this section are available <a class="reference external" href="./files/LineCountExample.tar">here</a>.</p>
+</div>
+</div>
+<div class="section" id="creating-a-text-clustering-workflow">
+<h2>Creating a text clustering workflow<a class="headerlink" href="#creating-a-text-clustering-workflow" title="Permalink to this headline">¶</a></h2>
+<p>This example describes how to define a text clustering workflow consisting of two operators. This workflow takes as input a dataset with raw text files. In the first operator the files are transformed into tf-idf vectors. Then the vectors are given as input to the next operator which performs the clustering using a k-means algorithm.</p>
+<p>We will use two Cilk-based implementations for this example.</p>
+<div class="section" id="id3">
+<h3>Dataset definition<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>We will use this text file for our example. The following file should exists in the HDFS cluster with name &#8216;textData&#8217;. Create the data definition as follows:
+1. Create a file named &#8216;textData&#8217; in the asapLibrary/datasets folder
+2. Add the following content:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">Constraints</span><span class="o">.</span><span class="n">Engine</span><span class="o">.</span><span class="n">FS</span> <span class="o">=</span> <span class="n">HDFS</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">text</span>
+<span class="n">Execution</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">hdfs</span><span class="p">:</span><span class="o">///</span><span class="n">user</span><span class="o">/</span><span class="n">asap</span><span class="o">/</span><span class="nb">input</span><span class="o">/</span><span class="n">textData</span>
+<span class="n">Optimization</span><span class="o">.</span><span class="n">size</span> <span class="o">=</span> <span class="mi">932</span><span class="n">E06</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tf-idf-abstract-operator-definition">
+<h3>TF-IDF abstract operator definition<a class="headerlink" href="#tf-idf-abstract-operator-definition" title="Permalink to this headline">¶</a></h3>
+<p>Next, we&#8217;ll define the abstract definition for a TF-IDF operator.
+1. Create a file named &#8216;tf-idf&#8217; in the asapLibrary/abstractOperators folder
+2. Add the following content:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">Constraints</span><span class="o">.</span><span class="n">Input</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">OpSpecification</span><span class="o">.</span><span class="n">Algorithm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">TF_IDF</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="k-means-abstract-operator-definition">
+<h3>K-Means abstract operator definition<a class="headerlink" href="#k-means-abstract-operator-definition" title="Permalink to this headline">¶</a></h3>
+<p>Create the abstract definition of K-Means operator as follows:
+1. Create a file named &#8216;kmeans&#8217; in the asapLibrary/abstractOperators folder
+2. Add the following content:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">Constraints</span><span class="o">.</span><span class="n">Input</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">OpSpecification</span><span class="o">.</span><span class="n">Algorithm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">kmeans</span>
+<span class="n">Constraints</span><span class="o">.</span><span class="n">Output</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Abstract workflow definition<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>In this step we&#8217;ll describe how to connect the two aforementioned operators in order to define the text clustering workflow.
+1. Create a folder named &#8216;TextClustering&#8217; in the asabLibrary/abstractWorkflows folder
+2. Specify the workflow graph by creating a file named &#8216;graph&#8217; with the following content:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>testdir,tfidf_cilk,0
+tfidf_cilk,d1,0
+d1,kmeans,0
+kmeans,d2,0
+d2,$$target
+</pre></div>
+</div>
+<p>Next, we will defined the materialized operators. We will use Cilk for our implementations.</p>
+</div>
+<div class="section" id="tf-idf-materialized-operator-definition-cilk">
+<h3>TF-IDF materialized operator definition (Cilk)<a class="headerlink" href="#tf-idf-materialized-operator-definition-cilk" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Create a folder named &#8216;TF_IDF_cilk&#8217; in the asapLibrary/operators folder.</li>
+<li>Create the description file named &#8216;description&#8217; and add the following content:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>Constraints.Output0.Engine.FS=HDFS
+Constraints.OpSpecification.Algorithm.name=TF_IDF
+Constraints.Input0.type=text
+Constraints.Output0.type=arff
+Constraints.Engine=Cilk
+Constraints.Output.number=1
+Constraints.Input.number=1
+Execution.LuaScript=TF_IDF_cilk.lua
+Execution.Arguments.number=2
+Execution.Argument0=In0.path.local
+Execution.Argument1=tfidf.out
+Execution.copyFromLocal=tfidf.out
+Execution.copyToLocal=In0.path
+Execution.Output0.path=$HDFS_OP_DIR/tfidf.out
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Create the lua file named &#8216;TF_IDF_cilk.lua&#8217; as follows:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">operator</span> <span class="o">=</span> <span class="n">yarn</span> <span class="p">{</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Execute cilk tfidf&quot;</span><span class="p">,</span>
+  <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+  <span class="n">cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="n">container</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">instances</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="o">--</span><span class="n">env</span> <span class="o">=</span> <span class="n">base_env</span><span class="p">,</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">[</span><span class="s2">&quot;tfidf&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;asapLibrary/operators/TF_IDF_cilk/tfidf&quot;</span><span class="p">,</span>
+                <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>               <span class="o">--</span> <span class="n">other</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;archive&#39;</span>
+                <span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;application&quot;</span>  <span class="o">--</span> <span class="n">other</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;private&#39;</span><span class="p">,</span> <span class="s1">&#39;public&#39;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s2">&quot;export LD_LIBRARY_PATH=/0/asap/qub/gcc-5/lib64:$LD_LIBRARY_PATH ; ./tfidf&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Add the &#8216;tfidf&#8217; executable (can be found in the tarball provided in the end of this article).</li>
+</ol>
+</div>
+<div class="section" id="k-means-materialized-operator-definition-cilk">
+<h3>K-Means materialized operator definition (Cilk)<a class="headerlink" href="#k-means-materialized-operator-definition-cilk" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Create a folder named &#8216;kmeans_cilk&#8217; in the asapLibrary/operators folder.</li>
+<li>Create the description file named &#8216;description&#8217; and add the following content:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>Constraints.Output0.Engine.FS=HDFS
+Constraints.OpSpecification.Algorithm.name=kmeans
+Constraints.Input0.Engine.FS=HDFS
+Constraints.Input0.type=arff
+Constraints.Engine=Spark
+Constraints.Output.number=1
+Constraints.Input.number=1
+Execution.LuaScript=kmeans_cilk.lua
+Execution.Arguments.number=2
+Execution.Argument0=In0.path.local
+Execution.Argument1=kmeans.out
+Execution.copyFromLocal=kmeans.out
+Execution.copyToLocal=In0.path
+Execution.Output0.path=$HDFS_OP_DIR/kmeans.out
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Create the lua file named &#8216;kmeans_cilk.lua&#8217; as follows:</li>
+</ol>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span><span class="n">operator</span> <span class="o">=</span> <span class="n">yarn</span> <span class="p">{</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Execute kmeans&quot;</span><span class="p">,</span>
+  <span class="n">timeout</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+  <span class="n">memory</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+  <span class="n">cores</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="n">container</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">instances</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="o">--</span><span class="n">env</span> <span class="o">=</span> <span class="n">base_env</span><span class="p">,</span>
+    <span class="n">resources</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">[</span><span class="s2">&quot;kmeans&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+       <span class="n">file</span> <span class="o">=</span> <span class="s2">&quot;asapLibrary/operators/kmeans_cilk/kmeans&quot;</span><span class="p">,</span>
+                <span class="nb">type</span> <span class="o">=</span> <span class="s2">&quot;file&quot;</span><span class="p">,</span>               <span class="o">--</span> <span class="n">other</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;archive&#39;</span>
+                <span class="n">visibility</span> <span class="o">=</span> <span class="s2">&quot;application&quot;</span>  <span class="o">--</span> <span class="n">other</span> <span class="n">values</span><span class="p">:</span> <span class="s1">&#39;private&#39;</span><span class="p">,</span> <span class="s1">&#39;public&#39;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="n">command</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s2">&quot;export LD_LIBRARY_PATH=/0/asap/qub/gcc-5/lib64:$LD_LIBRARY_PATH ; ./kmeans&quot;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Add the &#8216;kmeans&#8217; executable (can be also found in the tarball).</li>
+</ol>
+</div>
+<div class="section" id="execute-the-workflow">
+<h3>Execute the workflow<a class="headerlink" href="#execute-the-workflow" title="Permalink to this headline">¶</a></h3>
+<p>After finishing the previous steps restart the server for changes to take effect. Then:
+1. Go to Abstract Workflows and click on TextClustering</p>
+<a class="reference internal image-reference" href="../_images/abstract.png"><img alt="../_images/abstract.png" src="../_images/abstract.png" style="width: 150%;" /></a>
+<ol class="arabic simple" start="2">
+<li>Materialize the workflow by clicking &#8216;Materialize&#8217; button</li>
+</ol>
+<a class="reference internal image-reference" href="../_images/materialized.png"><img alt="../_images/materialized.png" src="../_images/materialized.png" style="width: 150%;" /></a>
+<ol class="arabic simple" start="3">
+<li>Start the workflow execution by clicking &#8216;Execute&#8217; button</li>
+</ol>
+<a class="reference internal image-reference" href="../_images/running.png"><img alt="../_images/running.png" src="../_images/running.png" style="width: 150%;" /></a>
+<p>The files used in this example can be downloaded <a class="reference external" href="./files/TextClustering.tar">here</a>.</p>
+</div>
+</div>
 </div>
 
 
@@ -296,17 +603,37 @@ echo &quot;Hello world&quot; &gt;&gt; $1
   <ul>
 <li><a class="reference internal" href="#">Installation &amp; Deployment</a><ul>
 <li><a class="reference internal" href="#installing-ires-platform">Installing IReS-Platform</a><ul>
-<li><a class="reference internal" href="#prerequisite">Prerequisite</a></li>
 <li><a class="reference internal" href="#overview">Overview</a></li>
-<li><a class="reference internal" href="#build">Build</a></li>
-<li><a class="reference internal" href="#update">Update</a></li>
+<li><a class="reference internal" href="#clone-ires-platform-to-the-server">Clone IReS-Platform to the server</a></li>
+<li><a class="reference internal" href="#run-install-sh">Run install.sh</a></li>
+<li><a class="reference internal" href="#validate-installation">Validate installation</a></li>
+<li><a class="reference internal" href="#start-the-ires-server">Start the IReS server</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#running-the-helloworld-workflow">Running the HelloWorld workflow</a></li>
-<li><a class="reference internal" href="#create-a-new-workflow-from-scratch">Create a new workflow from scratch</a><ul>
+<li><a class="reference internal" href="#create-the-helloworld-workflow-from-scratch-ui">Create the HelloWorld workflow from scratch (UI)</a><ul>
 <li><a class="reference internal" href="#creating-abstract-operators">1. Creating Abstract Operators</a></li>
-<li><a class="reference internal" href="#creating-materialized-operators">2. Creating Materialized Operators</a></li>
-<li><a class="reference internal" href="#creating-the-abstract-workflow">3. Creating the Abstract Workflow</a></li>
+<li><a class="reference internal" href="#creating-materialized-operators-server-side">2. Creating Materialized Operators (Server-side)</a></li>
+<li><a class="reference internal" href="#creating-materialized-operators-client-side-via-the-rest-api">3. Creating Materialized Operators (Client-side via the REST API)</a></li>
+<li><a class="reference internal" href="#creating-the-abstract-workflow">4. Creating the Abstract Workflow</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#create-an-input-process-output-workflow">Create an input-process-output workflow</a><ul>
+<li><a class="reference internal" href="#dataset-definition">Dataset definition</a></li>
+<li><a class="reference internal" href="#materialized-operator-definition-via-rest">Materialized Operator Definition (via REST)</a></li>
+<li><a class="reference internal" href="#abstract-operator-definition">Abstract operator definition</a></li>
+<li><a class="reference internal" href="#abstract-workflow-definition">Abstract workflow definition</a></li>
+<li><a class="reference internal" href="#workflow-materialization">Workflow Materialization</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#creating-a-text-clustering-workflow">Creating a text clustering workflow</a><ul>
+<li><a class="reference internal" href="#id3">Dataset definition</a></li>
+<li><a class="reference internal" href="#tf-idf-abstract-operator-definition">TF-IDF abstract operator definition</a></li>
+<li><a class="reference internal" href="#k-means-abstract-operator-definition">K-Means abstract operator definition</a></li>
+<li><a class="reference internal" href="#id4">Abstract workflow definition</a></li>
+<li><a class="reference internal" href="#tf-idf-materialized-operator-definition-cilk">TF-IDF materialized operator definition (Cilk)</a></li>
+<li><a class="reference internal" href="#k-means-materialized-operator-definition-cilk">K-Means materialized operator definition (Cilk)</a></li>
+<li><a class="reference internal" href="#execute-the-workflow">Execute the workflow</a></li>
 </ul>
 </li>
 </ul>
