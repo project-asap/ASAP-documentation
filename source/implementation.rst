@@ -129,15 +129,32 @@ In this section, we present the description of an abstract workflow. The user of
 
 An abstract workflow is defined as a DAG graph that connects a mixture of abstract and materialized datasets and operators. The missing information needed for describing the DAG graph is a set of edges. For example the description of the previous workflow can be created using the following list of edges (d1 is the output of TF_IDF and d2 is the output of k-Means). 
 
-| crawlDocuments,TF_IDF 
-| TF_IDF,d1 
-| d1,k-Means 
-| k-Means,d2 
-| d2,$$target 
+| crawlDocuments,TF_IDF,0 
+| TF_IDF,d1,0
+| d1,k-Means,0 
+| k-Means,d2,0 
+| d2,$$target
 
 .. figure:: abstractworkflow.png
 	
 	Abstract Workflow Description
+
+For each edge definition the input position should be defined at the end of each line. For example, in this line 
+
+| crawlDocuments,TF_IDF,0 
+
+The "0" defines that the crawlDocuments dataset is the first input to the TF_IDF operator. Also in the following line
+
+| k-Means,d2,0 
+
+the "0" again defines that the output of k-Means is the first input of d2. Let's assume a workflow consisting of operators with more than one inputs.
+
+| in0,test,0
+| in1,test,1
+| test,o0,0
+| test,o1,1
+
+In this example the *test* operator takes two inputs. The first input to this operator is the *in0* while the second is the *in1*.
 
 A  special  tag  $$target  is  used  to  define  which  dataset  is  the  final  output  of  the  DAG graph.
 
