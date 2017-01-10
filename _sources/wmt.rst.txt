@@ -113,7 +113,7 @@ Design a workflow
 
 Creating a workflow from scratch can be done by following steps:
 
-1. Click **new workflow** on the top of the page and provide a name.
+1. Click new workflow button on the top of the page and provide a name.
 2. Create a graph of a workflow. Add datastore using the buttons add datastore.
 3. Add a new task for datasets, selecting among the existing datasets that are defined in IReS.
 4. Add a node, using the add node button.
