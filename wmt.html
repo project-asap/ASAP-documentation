@@ -53,61 +53,63 @@
 <div class="section" id="workflow-representation">
 <h2>Workflow Representation<a class="headerlink" href="#workflow-representation" title="Permalink to this headline">¶</a></h2>
 <p>In WMT, a workflow is represented in a single JSON file. This representation captures structural information, design metadata (e.g., functional and non-functional requirements, physical characteristics like resource allocation), operator properties (e.g., type, schemata, statistics, engine and implementation details, physical characteristics like memory budget), and so on.
-The first levels of the metadata tree of the workflow are the following (shown in the Figure below):</p>
+The first levels of the metadata tree of the workflow are the following:</p>
 <ul class="simple">
 <li><strong>Nodes</strong> Each node contains a list of task IDs which belong to this node.</li>
 <li><strong>Edges</strong> This is a list of pairs of node IDs - (sourceId, targetId). An edge defines the flow of data from one vertex to another. These nodes are called the source and the target, respectively.</li>
 <li><strong>Tasks</strong> This part contains a list of task meta-data. The task meta-data consists of the information that is used to match abstract and materialized operators and datasets and the ID of a node to which this task belongs.</li>
 <li><strong>TaskLinks</strong> (optional) This part contains links between tasks lying within a single node.</li>
 </ul>
-<img alt="_images/wtree.png" src="_images/wtree.png" />
-</div>
-<div class="section" id="workflow-analysis">
-<h2>Workflow Analysis<a class="headerlink" href="#workflow-analysis" title="Permalink to this headline">¶</a></h2>
-<p>The workflow structure alleviates from the user the burden of determining any or some execution semantics for the application logic. The execution semantics of the workflow includes the execution of tasks in vertices and the execution of input-output dependencies of edges. The determination of the execution semantics of vertices and edges leads to an execution plan of the workflow. We refer to this plan as the analysed workflow. The latter is actually an enhancement of the initial workflow with more vertices, and substitution of vertices and/or edges in the initial workflow with others. More specifically, in the analysed workflow, an edge with different input and output metadata, may be replaced with two edges and a new vertex; the new vertex corresponds to a new task that takes the data and metadata of the input of the initial edge and produces the data and metadata of the output of the initial edge. In other words, since the data of the input and the output of an edge are equivalent, this task changes only the metadata. Such vertices are associative, as they encompass associative tasks. Also, a vertex that includes multiple tasks, in the original workflow, is replaced, in the analysed workflow, with a set of new vertices that each includes one task of the original vertex. The new vertices may or may not be connected with new edges. Furthermore, in the analysed workflow, a vertex that corresponds to multiple tasks is replaced with an associative subgraph that contains a set of new vertices that correspond to these tasks. This set contains vertices that correspond to the tasks of the initial vertex: each new vertex corresponds to one task; vertices may correspond 1-1 to tasks, but it can be the case that two or more vertices correspond to the same task. Naturally, the incoming edges of the initial vertex may have to be replicated, since they may correspond to the input of more than one tasks. The outgoing edges, however, remain the same, as each corresponds to the output of one task. The replacing subgraph may also contain new edges that connect the replacing vertices. Such edges represent the dependencies between tasks related to their execution semantics, and not related to the semantics of the application logic, as expressed by the user.</p>
-</div>
-<div class="section" id="workflow-implementation">
-<h2>Workflow Implementation<a class="headerlink" href="#workflow-implementation" title="Permalink to this headline">¶</a></h2>
-<img alt="_images/architect.png" src="_images/architect.png" />
-<p>The above figure depicts the architecture of WMT as well as its interaction with external components. The main components of the architecture are:</p>
-<ul class="simple">
-<li><strong>Interface</strong> The interface accepts a workflow definition in the workflow representation. It enables users to interactively create and/or modify a workflow.</li>
-<li><strong>Analyzer</strong> The analyzer parses the workflow, identifies operators and data stores and maps them to a library of operators supported in WMT, generates metadata of edges, finds edges where the data conversion should be applied and adds the appropriate conversions.</li>
-<li><strong>Optimizer</strong> The optimizer generates a functionally equivalent workflow graph optimized towards the performance objective.</li>
-</ul>
-<p>These provide for workflow design, analysis and optimization. After their design, analysis and optimization, workflows are ready for their execution. They can be executed on independent engines and storage repositories, i.e. engines and repositories that may be accessed through other paths in ASAP or another third party platform, besides WMT.</p>
-</div>
-<div class="section" id="workflow-architecture">
-<h2>Workflow Architecture<a class="headerlink" href="#workflow-architecture" title="Permalink to this headline">¶</a></h2>
-<p>WMT interface is a web application. It provides full functionality for designing a workflow even in the absence of server-side (Analyzer and Optimizer modules). It is encoded in Hypertext Markup Language (HTML) . To deliver content, WMT uses the Nginx web server. To encode business logic, WMT uses Javascript and PHP-FPM. The pages and scripts are compiled using Grunt. The Analysis and Optimisation modules are scripts in Python. The figure below depicts the technical stack used in WMT and the interaction of WMT parts.</p>
-<img alt="_images/tech_stack.png" src="_images/tech_stack.png" />
 </div>
 <div class="section" id="workflow-functionality">
 <h2>Workflow Functionality<a class="headerlink" href="#workflow-functionality" title="Permalink to this headline">¶</a></h2>
 <img alt="_images/gui.png" src="_images/gui.png" />
-<p>WMT provides a GUI to enable users to design workflows and perform analysis and optimization. The GUI consists of several areas (Figure 4.1) that perform the following functions:
-• Display the workflow (Area 1).
-• Add nodes and edges (Area 2). This process depicted in the figure above. First, the user adds a node, then she adds two tasks in it from the operators library, and finally she connects nodes and tasks.
-• Create a new workflow from scratch, save and load it.
-• Perform workflow analysis or optimization.
-• Add tasks from a library (see the figure below) or create new ones (Area 3). If the user adds a task from a library then it is accompanied by a set of metadata, i.e., properties that describe them. If a new task is created then the first levels of the metadata tree are predefined but users can add their ad-hoc subtrees to define their custom data or operators.
-• Display metadata of the selected task (Area 4).</p>
+<p>WMT provides a GUI to enable users to design workflows and perform analysis and optimization. The GUI consists of several areas that perform the following functions:</p>
+<ul class="simple">
+<li>Display the workflow (Area 1).</li>
+<li>Add nodes and edges (Area 2). This process depicted in the figure above. First, the user adds a node, then she adds two tasks in it from the operators library, and finally she connects nodes and tasks.</li>
+<li>Create a new workflow from scratch, save and load it.</li>
+<li>Perform workflow analysis or optimization.</li>
+<li>Add tasks from a library (see the figure below) or create new ones (Area 3). If the user adds a task from a library then it is accompanied by a set of metadata, i.e., properties that describe them. If a new task is created then the first levels of the metadata tree are predefined but users can add their ad-hoc subtrees to define their custom data or operators.</li>
+<li>Display metadata of the selected task (Area 4).</li>
+</ul>
 <img alt="_images/lib_buttons.png" src="_images/lib_buttons.png" />
 </div>
 <div class="section" id="link">
 <h2>Link<a class="headerlink" href="#link" title="Permalink to this headline">¶</a></h2>
-<p>The code of the WMT can be found in &lt;<a class="reference external" href="https://github.com/project-asap/workflow.git">https://github.com/project-asap/workflow.git</a>&gt;</p>
+<p>The code of the WMT can be found in:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span><span class="nt">&lt;https://github.com/project-asap/workflow.git&gt;</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
 <p>For demostration reasons a Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.</p>
 <p>The installation instructions are the following:</p>
 <ol class="loweralpha simple">
-<li>Install nginx, php-fpm, npm and python packages. Execute the command: sudo apt-get install nginx php-fpm npm python</li>
-<li>The project&#8217;s root directory stores a configuration file for nginx: wmt.conf.default. It should be changed appropriately: on line 5 set $ROOT &#8220;/your/path/to/wmt&#8221;;. Then you can use this file for nginx server configuration: ln -s ~/your/path/to/wmt/wmt.conf /your/nginx/installation/servers/ (where nginx server is installed.)</li>
-<li>Install the Grunt&#8217;s command line interface (CLI) globally can be done with the following commands: sudo npm install -g grunt-cli</li>
-<li>Start nginx: sudo service nginx start</li>
+<li>Install nginx, php-fpm, npm and python packages. Execute the command:</li>
 </ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>sudo apt-get install nginx php-fpm npm python
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="2">
+<li>The project&#8217;s root directory stores a configuration file for nginx: wmt.conf.default. It should be changed appropriately: on line 5 set $ROOT &#8220;/your/path/to/wmt&#8221;;. Then you can use this file for nginx server configuration:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>ln -s ~/your/path/to/wmt/wmt.conf /your/nginx/installation/servers/ (where nginx server is installed.)
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="3">
+<li>Install the Grunt&#8217;s command line interface (CLI) globally can be done with the following commands:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>sudo npm install -g grunt-cli
+</pre></div>
+</div>
+<ol class="loweralpha simple" start="4">
+<li>Start nginx:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>sudo service nginx start
+</pre></div>
+</div>
 </div>
 <div class="section" id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
@@ -126,10 +128,17 @@ The first levels of the metadata tree of the workflow are the following (shown i
 <h2>Design a workflow<a class="headerlink" href="#design-a-workflow" title="Permalink to this headline">¶</a></h2>
 <p>Creating a workflow from scratch can be done by following steps:</p>
 <ol class="arabic simple">
-<li>First, click new workflow on the top of the page.</li>
-<li>Then, create a graph of a workflow: add nodes and datastores using buttons add datastore and add node; connect them using button add links, when it is pressed сlicking on the first then the second nodes adds an edge between them.</li>
-<li>Add tasks into the nodes: choose a node; click add task on the left sidebar; choose from the list of operators and then edit metadata to your needs.</li>
-<li>Save the workflow, click save workflow on the top navbar.</li>
+<li>Click <strong>new workflow</strong> on the top of the page and provide a name.</li>
+<li>Create a graph of a workflow. Add datastore using the buttons add datastore.</li>
+<li>Add a new task for datasets, selecting among the existing datasets that are defined in IReS.</li>
+<li>Add a node, using the add node button.</li>
+<li>Add a task for the abstract workflow, selecting among the existing abstract workflows that are defined in IReS.</li>
+<li>Add a datastore</li>
+<li>Add a task for the final abstract datastore.</li>
+<li>Connect the initial datastore to the abstract workflow, using button add links, when it is pressed сlicking on the first then the second nodes adds an edge between them.</li>
+<li>Connect the abstact workflow to the final datastore.</li>
+<li>Press upload workflow.</li>
+<li>The workflow should appear in the IReS abstract workflow tab. If there are materialized operators the workflow should be able to be materialized and execute in IReS.</li>
 </ol>
 </div>
 </div>
@@ -145,9 +154,6 @@ The first levels of the metadata tree of the workflow are the following (shown i
 <li><a class="reference internal" href="#">Workflow Management Tool Documentation</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
 <li><a class="reference internal" href="#workflow-representation">Workflow Representation</a></li>
-<li><a class="reference internal" href="#workflow-analysis">Workflow Analysis</a></li>
-<li><a class="reference internal" href="#workflow-implementation">Workflow Implementation</a></li>
-<li><a class="reference internal" href="#workflow-architecture">Workflow Architecture</a></li>
 <li><a class="reference internal" href="#workflow-functionality">Workflow Functionality</a></li>
 <li><a class="reference internal" href="#link">Link</a></li>
 <li><a class="reference internal" href="#install">Install</a></li>
