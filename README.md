@@ -13,4 +13,7 @@ The documentation is based on [Sphinx](http://www.sphinx-doc.org/en/1.5.1/en/). 
     make html
   </li>
 </ol>
-  
+
+##Documenation URL
+The documentation is accessible via the following URL:<br>
+https://project-asap.github.io/ASAP-documentation/
