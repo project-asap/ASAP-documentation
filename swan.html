@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Analytics Programming Model - SWAN Compiler &#8212; Asap 0.0 documentation</title>
+    <title>Swan Operators &#8212; Asap 0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -28,7 +28,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="top" title="Asap 0.0 documentation" href="index.html" />
     <link rel="next" title="Telecommunication Analytics" href="telecom_analytics.html" />
-    <link rel="prev" title="Extension of Apache Spark" href="spark.html" />
+    <link rel="prev" title="Extension of the Apache Spark" href="spark.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -44,38 +44,217 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="analytics-programming-model-swan-compiler">
-<h1>Analytics Programming Model - SWAN Compiler<a class="headerlink" href="#analytics-programming-model-swan-compiler" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="swan-operators">
+<h1>Swan Operators<a class="headerlink" href="#swan-operators" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>ASAP aims to make it easy for users to describe and run data analytics queries by selecting the most suitable and efficient execution engines. There should be no restriction on the type of execution engine or on the format and medium used for input and output datasets. ASAP provides a workflow tool to facilitate the visual creation and adaptation of data analytics queries enabling analytics experts to create and change queries by dragging operator boxes and dataset flow arrows in a graphical interface into a suitable pictorial representation of a query workflow. Subsequent to query creation in the workflow tool, a multi-engine resource scheduling platform, IReS takes the workflow description of the analytics query and co-operates with a set of runtimes and data stores in order to effect the best implementation and execution of the query. A bridge is needed between the high level abstract description of a workflow query and the actual provisioning and execution of codes that can run the query.  This bridge is satisfied by the ASAP compiler. It maps the user’s high level workflow query,  as created within the workflow tool , to codes for the low-level programming language <strong>Swan</strong> using metadata which describes how Swan operators are materialized.  ASAP’s scheduler can subsequently use these codes to profile and select optimum runtime engines and data stores.</p>
+<p>This document describes the ASAP library of data analytics operators and the Swan parallel programming language on which it is built. The library defines data types, classes and methods that are helpful in data analytics. The code is written using the Swan language to indicate opportunities for parallelisation.</p>
 </div>
-<div class="section" id="design">
-<h2>Design<a class="headerlink" href="#design" title="Permalink to this headline">¶</a></h2>
-<p>The compiler reads and stores:</p>
-<ol class="arabic simple">
-<li>The metadata for materialized operators</li>
-<li>The user’s work-flow description</li>
-</ol>
-<p>and generates Swan source code which can execute the user’s analytics query.</p>
-<p>There are two phases:</p>
-<p><strong>Phase 1</strong>: The compiler loads descriptions of operators and workflows from the metadata files into instances of descriptor classes which map operators from the user’s workflow to source code and subsequently executable code. Once this is loaded the compiler can infer rules around the use of individual operators.  For example, it will be able to build the function signature for calls to core functions such inputoutput and operator run statements.  It can work out what type definitions are required for different operators, what arguments are permitted to operators such as K-means and what the default values are if these are not supplied by the user.</p>
-<p><strong>Phase 2</strong>: The compiler generates  the  code  by  loading  skeletal  source  code  from  template  files. These contain sections of Swan source code calling into a library with pre-defined functions. The skeletal code moreover contains placeholders requiring substitution with actual values and/or code sections. The compiler reads the templates and performs these substitions using operator rules to produce operator codes.</p>
+<div class="section" id="swan-an-extension-of-the-cilk-parallel-programming-language">
+<h2>Swan: An Extension of the Cilk Parallel Programming Language<a class="headerlink" href="#swan-an-extension-of-the-cilk-parallel-programming-language" title="Permalink to this headline">¶</a></h2>
+<p>Swan is an extension to the Cilk parallel programming language, which was originally designed at the Supercomputing Technologies group at MIT, and is currently supported by Intel under the name Cilk Plus. Swan extends Cilk by adding dataflow dependences to express more complex parallel patterns than Cilk. One of these is pipeline parallelism. Moreover, Swan adds annotations to parallel for loops that help to increase performance.</p>
+<div class="section" id="spawn-and-sync">
+<h3>Spawn and Sync<a class="headerlink" href="#spawn-and-sync" title="Permalink to this headline">¶</a></h3>
+<p>Parallelism is expressed by indicating that two (or more) pieces of code may execute in parallel. Typically, this implies that these pieces of code do not write to variables or memory locations that the other reads or writes to. These pieces of code may be any legal C/C++ code. In practice, Cilk requires that at least one piece of code is extracted in a function or isolated in a C++ lambda expression (an anonymous function).</p>
+<p>Parallelism is introduced by adding the cilk_spawn keyword to the function call statement. We say that the function is spawned rather than called. The spawned function may execute in parallel with the remainder of the calling function. This is called the continuation of the calling function. The parallelism exists until a cilk_sync statement is encountered, or until the end of the calling function, whichever is encountered first.</p>
+<p>The Cilk runtime is allowed to execute the spawned function with the continuation of the calling function, but is not obliged to do so. In fact, the Cilk runtime only executes in parallel as many spawns as is required to keep all CPU cores busy. Beyond this, it executes the spawned statements in a sequential manner, as this is much more efficient. Adding spawn statements to a program, thus, has little overhead in case they are not selected for parallel execution by the runtime.</p>
+<p>The following is an example of Quicksort expressed in Cilk (source: <a class="reference external" href="https://github.com/tjd/sqlite_cpp/blob/master/cilk_test/qsort/qsort.cilk">https://github.com/tjd/sqlite_cpp/blob/master/cilk_test/qsort/qsort.cilk</a>):</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>void qsort(int <span class="ge">*begin, int *</span>end) {
+        if (begin != end) {
+                --end;  // Exclude last element (pivot) from partition
+                int * middle = std::partition(begin, end,
+                        std::bind2nd(std::less&lt;int&gt;(), *end));
+                std::swap(<span class="ge">*end, *</span>middle);    // move pivot to middle
+                cilk_spawn qsort(begin, middle);
+                qsort(++middle, ++end); // Exclude pivot and restore end
+                cilk_sync;
+        }
+}
+</pre></div>
 </div>
-<div class="section" id="algorithm">
-<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
-<p>The compiler algorithm is driven by:</p>
-<ol class="arabic simple">
-<li>The flow of operators in the user’s workflow description.</li>
-</ol>
-<p>2.  The general sequencing and layout of a Swan/C++ program.
-Initially the compiler parses metadata from the materialized operators library and creates a hierarchy of descriptor instances which represent operator and language construct rules.  These may be anything from operator objects to rules for declarations, typedefs and arguments associated with operators.</p>
-<p>Code generation proceeds by:</p>
-<p>Parsing and looping around the user’s workflow of operators.
-(a)  Referencing the descriptor instances.
-(b)  Referencing template code files and substituting placeholders.
-(c)  Printing the code section.</p>
-<p>Typically  declarations  for  input,  output  and  operator  arguments  are  generated  directly  and wholly from the materialized operator rules, replacing variable names with internally generated compiler ones and filenames with those supplied by the user.</p>
+<p>Quicksort first partitions the range of values to sort using a pivot. It then recursively sorts the range of values less than the pivot and the range of values larger than the pivot. As these subranges are independent (non-overlapping), they can be sorted in parallel. This is indicated by labelling the first recursive call with cilk_spawn.</p>
+<p>Note that one could also add the cilk_spawn keyword to the second recursive call. This is however redundant as it was already apparent that this call may execute in parallel with the first recursive call.</p>
+</div>
+<div class="section" id="paraller-for-loops">
+<h3>Paraller for loops<a class="headerlink" href="#paraller-for-loops" title="Permalink to this headline">¶</a></h3>
+<p>The spawn/sync mechanism is very versatile. It can be used to express parallel for loops, a common idiom, as well. However, this is somewhat tedious. The Cilk compiler allows programmers to annotate parallel for loops using the cilk_for keyword, e.g.:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cilk_for(int i=0; i &lt; n; ++i) {
+        a[i] = ...;
+}
+</pre></div>
+</div>
+<p>The compiler outlines the body of a cilk_for loop in a distinct function and generates code to call the loop body in parallel, using the cilk_spawn statement.</p>
+<p>Every iteration of the loop should modify distinct memory locations. There are moreover restrictions on the structure of the loop iteration. In essence, the number of iterations of the loop must be known at execution time just before starting the loop. This implies that the loop should not have break statements and that the loop iteration variable (i) is modified only by the loop increment statement (++i, the third part in the for loop syntax).</p>
+</div>
+<div class="section" id="generalized-reductions">
+<h3>Generalized Reductions<a class="headerlink" href="#generalized-reductions" title="Permalink to this headline">¶</a></h3>
+<p>Cilk provides definitions for generalized reductions that are associative but not necessarily commutative. As the reduction operation need not be commutative, many operations such as list prepend/append and hash-map insert can now be expressed as reduction operations. In these cases it is guaranteed that the reduction variable contains the same value as computed by the serial elision of the Cilk program.</p>
+<p>Cilk defines reductions with three components: a data type, an associative operation and an identity value for that operation. These components are defined in a monoid class that serves as the basis for a reducer class definition.</p>
+<p>The following is the definition of a Cilk reducer for a hash-map data type:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>template&lt;class map_type&gt;
+class map_reducer {
+        struct Monoid : cilk::monoid_base&lt;map_type&gt; (-<span class="ge">*\label{lst:red:map:monoid}*</span>-){
+                static void reduce(map_type <span class="ge">* left, map_type *</span> right) {(-<span class="ge">*\label{lst:red:map:reduce}*</span>-)
+                        for(typename map_type::const_iterator
+                                I=right-&gt;cbegin(), E=right-&gt;cend(); I != E; ++I)
+                                (*left)[I-&gt;first] += I-&gt;second;
+                        right-&gt;clear();
+                }
+                static void identity(map_type <span class="ge">* p) const {(-*</span>\label{lst:red:map:identity}*-)
+                        new (p) map_type();
+                }
+        };
+        cilk::reducer&lt;Monoid&gt; imp_;(-<span class="ge">*\label{lst:red:map:imp}*</span>-)
+
+public:
+        map_reducer() : imp_() { }
+        typename map_type::value_type &amp; operator[](
+                        const typename map_type::key_type &amp; key) {
+                return imp_.view()[key];
+        }
+        typename map_type::const_iterator cbegin() {
+                return imp_.view().cbegin();
+        }
+        typename map_type::const_iterator cend() {
+                return imp_.view().cend();
+        }
+        void swap(map_type &amp; other) {
+                return imp_.view().swap(other);
+        }
+        map_type &amp; get_value() {
+                return imp_.view();
+        }
+};
+</pre></div>
+</div>
+<p>It is assumed that the template parameter map_type defines a hash-map type that is compatible to the C++ standard&#8217;s std::map. The definition consists of a Monoid class, which defines the base type (through the monoid_base template parameter), the identity value (through an initialization function) and the reduction function. It is assumed that hash-maps are reduced by taking the join of all keys and that the values for common keys are further reduced using an operator +=. This behavior is specified in the reduce function.</p>
+<p>The runtime system dynamically creates copies of the reduction variable, and reduces those copies as needed. These copies are called views. A view is created for a worker thread when it first accesses the reduction variable. The view is initialized with the identity element. The worker retains the view when spawning a task. When an idle worker steals a continuation from another worker&#8217;s deque, it does not receive a view for that reduction variable. The view is created only on the first access to the reduction variable. When a worker completes a spawned task leaving its spawn deque empty, or when a worker executes a cilk_sync statement, the view is reduced with that of a sibling task.</p>
+<p>The example above defines a map_reducer class. The member value <strong>imp_</strong> is declared as an instance of the reducer class, specialized by the Monoid definition. The object <strong>imp_</strong> manages the creation, lookup and destruction of views. The map_reducer class further provides access to the underlying view through the operator [] in order to add items to the hash-map.</p>
+<p>The map_reducer class may be used in parallel code as follows:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>map_reducer&lt;std::map&lt;std::string,size_t&gt;&gt; map;
+cilk_for(std::vector&lt;std::string&gt;::const_iterator
+                I=vec.cbegin(); I != vec.cend(); ++I) {
+        map[*I]++;
+}
+</pre></div>
+</div>
+<p>The cilk_for construct creates parallelism. Each concurrently executing loop iteration references the same instance of the map_reducer class, but the cilk::reducer object <strong>imp_</strong> serves up different views in concurrently executing iterations. All views are reduced prior to completion of the cilk_for loop.</p>
+<p>Note that the reduction operation should ideally execute in constant-time, otherwise the execution time of the program will depend on the number of reduction operations performed. The number of reduction operations is, in any case, proportional to the number of steal operations.</p>
+</div>
+<div class="section" id="array-notation">
+<h3>Array Notation<a class="headerlink" href="#array-notation" title="Permalink to this headline">¶</a></h3>
+<p>Cilk Plus supports an array notation that facilitates auto-vectorization, i.e., the use of SIMD vector instructions to accelerate processing. The array notation allows for 3 fields in an array section expression: a[i:l:s], where i is the start index of the array section, l is the length and s is the stride. Each element of the array notation is optional, but at least one colon must be present. Default values are 0 for i, the length of the array for l, provided it is known at compile-time, and 1 for s. E.g., a[:] indicates the full array if its size is statically known, while a[:10:2] indicates the elements at indices 0, 2, 4, 6, 8.</p>
+<p>Expressions may be built up using array notations, e.g., the statement c[:] = a[:]+2*b[:]; is equivalent to</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>for(int i=0; i &lt; n; ++i)
+        c[i] = a[i] + 2*b[i];
+</pre></div>
+</div>
+<p>assuming each array was declared with length n.</p>
+<p>One can also map functions over all elements of an array section. E.g., a[:] = pow(b[:]) applies the function pow to each element of array b and stores the result in the corresponding element of array a. Reductions are specified using built-in functions that may be applied to arbitrary array sections. E.g., __sec_reduce_add(a[::2]) returns the sum of the array elements at even positions of a.</p>
+<p>The key advantage of the array notation is that it enables the compiler to auto-vectorize the code. Vectorization can be important towards performance as map-reduce programs often exhibit a data streaming pattern.</p>
+</div>
+</div>
+<div class="section" id="swan-s-extensions-to-cilk">
+<h2>Swan&#8217;s Extensions to Cilk<a class="headerlink" href="#swan-s-extensions-to-cilk" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dataflow-dependences">
+<h3>Dataflow dependences<a class="headerlink" href="#dataflow-dependences" title="Permalink to this headline">¶</a></h3>
+<p>Dependencies are tracked at the object level. An object must be declared as a versioned object in order to enable dependency tracking. Versioned objects support automatic tracking of dependencies as well as creating new versions of the object in order to increase task-level parallelism (a.k.a. renaming).</p>
+<p>Dependency tracking is enabled on tasks that take particular types as arguments: the indep, outdep and inoutdep types. These types are little more than a wrapper around a versioned object that extends its type with the memory access mode of the task: input, ouput or input/output (in/out). The language allows only to pass versioned objects to such arguments.</p>
+<p>When spawning a task, the scheduler analyzes the signature of the spawned procedure for arguments with a memory access mode. If none of the arguments describe a memory access mode, then the spawn statement is an unconditional spawn and it has the same semantics as a Cilk spawn. Otherwise, the spawn statement is a conditional spawn. The memory accesses of the task are tracked and, depending on runtime conditions, the task either executes immediately or it is queued up in a set of pending tasks.</p>
+<p>The sync statement in our language has the same semantics as the Cilk sync statement: it postpones the execution of a procedure until all child tasks have finished execution.</p>
+<p>We consider only situations where dependencies are tracked between the children of a single parent procedure. Each dynamic procedure instance may have a task graph that restricts the execution order of its children. This restriction ensures that all parallel executions compute the same value as the sequential elision of the program. Note that the sequential elision of the program always respects the dependencies in the program: by deducing dependencies from input/output properties, there can never be backward dependencies in the sequential elision. Furthermore, by having multiple independent task graphs in a program, we can mitigate the performance impact of building the task graph in serial fashion.</p>
+<p>Our model allows arbitrarily mixing fork/join style and task graph execution. The only problematic issue to allow this is that we must take care when nesting task graphs, in particular when passing versioned objects across multiple dependent spawns. To make this work correctly, we must use distinct metadata for every dependent spawn to track its dependencies separately.</p>
+<p>The following is an example of square matrix multiplication expressed in Swan using runtime tracking and enforcement of task dependencies. Here, the matrix multiplication is performed by blocks, i.e., matrices are partitioned in sub-blocks and parallelism between operations on sub-blocks is made explicit using data-flow annotations.</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>typedef float (*block_t)[16]; // 16x16 tile
+typedef swan::versioned&lt;float[16][16]&gt; vers_block_t;
+typedef swan::indep&lt;float[16][16]&gt; in_block_t;
+typedef swan::inoutdep&lt;float[16][16]&gt; inout_block_t;
+
+void mul_add(in_block_t A, in_block_t B, inout_block_t C) {
+        block_t a = (block_t)A; // Recover pointers
+        block_t b = (block_t)B; // to the raw data
+        block_t c = (block_t)C; // from the versioned objects
+}
+
+void matmul(vers_block_t <span class="ge">* A, vers_block_t *</span> B,
+                vers_block_t * C, unsigned n) {
+        for( unsigned i=0; i &lt; n; ++i ) {
+                for( unsigned j=0; j &lt; n; ++j ) {
+                        for( unsigned k=0; k &lt; n; ++k ) {
+                                cilk_spawn mul_add( (in_block_t)A[i*n+j],
+                                        (in_block_t)B[j*n+k],
+                                        (inout_block_t)C[i*n+k] );
+                        }
+                }
+        }
+        cilk_sync;
+}
+</pre></div>
+</div>
+</div>
+<div class="section" id="performance-hints-for-parallel-for-loops">
+<h3>Performance hints for parallel for loops<a class="headerlink" href="#performance-hints-for-parallel-for-loops" title="Permalink to this headline">¶</a></h3>
+<p>Swan adds two annotations to cilk_for loops. These annotations inform the runtime how to schedule tasks on CPU cores most efficiently.</p>
+<p>The NUMA annotation facilitates performance tuning for systems with a Non-Uniform Memory Architecture (NUMA), e.g., multi-socket machines. This annotation indicates that the iterations of the loop should be scheduled on distinct NUMA domains (sockets). It is the programmer&#8217;s responsibility to ensure that there are no more loop iterations than NUMA domains.</p>
+<p>Example usage:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>int chunk = (len + num_numa_domains - 1) / num_numa_domains;
+#pragma cilk numa(strict)
+cilk_for(int d=0; d &lt; num_numa_domains; ++d)
+        cilk_for(int i=d<span class="ge">*chunk; i &lt; std::min((d+1)*</span>chunk,len); ++i)
+        a[i] = ...;
+</pre></div>
+</div>
+<p>In the example above, the outer loop (with loop iteration variable d) is annotated as a NUMA loop. Each iteration of this loop will be executed on a distinct NUMA domain. The iterations of the inner loop (using loop iteration variable i) are spread over the CPU cores of one the NUMA domain of the corresponding d value.</p>
+<p>Swan furthermore accelerates execution of fine-grain parallel loops through an alternative runtime with much lower overhead compared to the Cilk runtime. Fine-grain loops should currently not be nested inside other parallel constructs. They can be invoked as follows:</p>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>#pragma cilk finegrain
+        cilk_for(int i=0; i &lt; n; ++i) {
+        a[i] = ...;
+        }
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="the-asap-operator-library-for-text-analytics">
+<h2>The ASAP operator library for text analytics<a class="headerlink" href="#the-asap-operator-library-for-text-analytics" title="Permalink to this headline">¶</a></h2>
+<p>The operator library provides basic data structures and algorithms and is primarily focused on text analytics. These operators should be considered examples of how to use the underlying data structures, how to optimize memory usage and how to use the Swan language to implement analytics. The following discussion describes the main organization of the library and links to per-class and per-method documentation for details on the API and arguments.</p>
+<div class="section" id="vector-types">
+<h3>Vector types<a class="headerlink" href="#vector-types" title="Permalink to this headline">¶</a></h3>
+<p>The basic data collection of homogeneous elements is a vector. It is indexed by an integer type starting with index zero and running up to the length of the vector. There are two vector types: dense vectors (asap::dense_vector) provide a storage location for every element in the range 0...length; sparse vectors (asap::sparse_vector) provide storage locations only for those elements set explicitly. Missing values are treated as zero.</p>
+<p>Vectors may have ownership over their storage, in which case the memory policy template type is asap::mm_ownership_policy . When vectors have ownership over the storage, then they allocate and deallocate the storage themselves. Alternatively, vectors may not have ownership (memory policy asap::mm_no_ownership_policy). In this case, the storage is managed externally, e.g., by a vector set. It is much more efficient to manage the storage of large data sets centrally, in one go, as this reduces memory allocation overhead and improves memory layout.</p>
+<p>Various vector operations are accelerated using vector instructions (SIMD - Single Instruction Multiple Data).</p>
+</div>
+<div class="section" id="extended-vector-types">
+<h3>Extended vector types<a class="headerlink" href="#extended-vector-types" title="Permalink to this headline">¶</a></h3>
+<p>Sparse and dense vectors can be extended to store additional information. This can be handy to cache information, or to store information associated to vectors more compactly. The type asap::vector_with_add_counter extends a asap::dense_vector or asap::sparse_vector type with a counter. The asap::vector_with_sqnorm_cache caches the square of the norm of the vector (the Euclidean distance between the vector and itself). The cached value is not automatically updated when the vector is changed, but needs to be explicitly recalculated.</p>
+</div>
+<div class="section" id="vector-set-type">
+<h3>Vector set type<a class="headerlink" href="#vector-set-type" title="Permalink to this headline">¶</a></h3>
+<p>A vector set is a list of vectors. As with vectors, we distinguish dense vector sets (asap::dense_vector_set) and sparse vector sets (asap::sparse_vector_set).</p>
+</div>
+<div class="section" id="word-banks">
+<h3>Word banks<a class="headerlink" href="#word-banks" title="Permalink to this headline">¶</a></h3>
+<p>Text analytics often require to store a large set of individual text fragments. These are accelerated using three data types that use different memory allocation policies.</p>
+<p>The asap::word_bank_malloc class stores a large number of text fragments and makes individual memory allocations and deallocations for every text fragment in the set.</p>
+<p>The asap::word_bank_pre_alloc class references text fragments within a pre-allocated chunk of text, i.e., it can reference words in a text document that is read into memory as single string. E.g., mapping the file into memory using the mmap system call is very efficient in terms of I/O. The asap::word_bank_pre_alloc class stores pointers into the mmap&#8217;ed memory region.</p>
+<p>The asap::word_bank_managed uses region-based memory management. Regions are large chunks of pre-allocated storage where bump-pointer allocation is used to efficiently add strings to the word bank. It is typically much more memory-efficient compared to asap::word_bank_pre_alloc.</p>
+</div>
+<div class="section" id="word-containers">
+<h3>Word containers<a class="headerlink" href="#word-containers" title="Permalink to this headline">¶</a></h3>
+<p>Where a word bank simply enumerates a set of words or text fragments, a word container provides additional functionality by means of an index into the words, or by associating values to the words.</p>
+<p>The class asap::word_list simply allows to construct a list or enumeration of words. While there may be repetition of words in the list, the word bank can ensure each word is stored only once. The asap::word_list dictates the sequence in which words occur.</p>
+<p>A asap::word_map associates additional information to each unique word. This information could be, e.g., the frequency of the word in a file.</p>
+<p>An asap::kv_list is a key-value abstraction over words. Like the asap::word_map it associates values to words. However, where the asap::word_map may use a map (e.g., std::map) or the optimized asap::hash_table to record the associated values, the asap::kv_list records the associated values as a list of key-value pairs.</p>
+<p>All word containers inherit from the class asap::word_container.</p>
+<p>Similarly to words, the classes asap::ngram_map and asap::ngram_kv_list provide associate storage for n-grams. They inherit from the base class asap::ngram_container.</p>
+</div>
+<div class="section" id="data-set-type">
+<h3>Data set type<a class="headerlink" href="#data-set-type" title="Permalink to this headline">¶</a></h3>
+<p>Data sets are described by the asap::data_set type. In essence, a asap::data_set is a combination of a vector set (either sparse or dense), and two elements of type asap::word_container that describe the labels for rows and columns on the data set. The data set also has a label to identify it or describe its contents.</p>
+</div>
+<div class="section" id="auxiliary">
+<h3>Auxiliary<a class="headerlink" href="#auxiliary" title="Permalink to this headline">¶</a></h3>
+<p>The asap::hash_table class is designed as an efficient associative data structure, using a low-overhead hash table. It is much faster than std::unordered_map.</p>
+</div>
 </div>
 <div class="section" id="setup">
 <h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
@@ -87,76 +266,145 @@ Initially the compiler parses metadata from the materialized operators library a
 <div class="section" id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
 <p>For demostration reasons a Linux operating system like Ubuntu it is assumed in this step. In Windows or other Linux distributions the equivalents should be done.</p>
+</div>
+<div class="section" id="input-output-formats">
+<h2>Input/Output formats<a class="headerlink" href="#input-output-formats" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="weka-file-format">
+<h3>WEKA file format<a class="headerlink" href="#weka-file-format" title="Permalink to this headline">¶</a></h3>
+<p>We provide routines to read and write data sets in the (WEKA file format)[<a class="reference external" href="http://www.cs.waikato.ac.nz/ml/weka/arff.html">http://www.cs.waikato.ac.nz/ml/weka/arff.html</a>]. See methods asap::arff_read and asap::arff_write.</p>
+</div>
+</div>
+<div class="section" id="analytics-operators">
+<h2>Analytics Operators<a class="headerlink" href="#analytics-operators" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="term-frequency">
+<h3>Term frequency<a class="headerlink" href="#term-frequency" title="Permalink to this headline">¶</a></h3>
+<p>The ASAP operators library provides the method asap::word_catalog for computing the term frequency of a document. It takes a filename as argument and stores the words and their frequency using one of the asap::word_container types. The method internally parallelizes scanning over the file contents.</p>
+<p>The method asap::ngram_catalog similarly calculates the frequency of occurence of n-grams. The number of terms in the &#8216;n&#8217;-gram is specified in the asap::ngram_container type that is used with this method.</p>
+<p>Both implementations internally use parallel execution. They use the word bank types and word/ngram container types for efficient memory management.</p>
+</div>
+<div class="section" id="tf-idf">
+<h3>TF-IDF<a class="headerlink" href="#tf-idf" title="Permalink to this headline">¶</a></h3>
+<p>The Term Frequency-Inverse Document Frequency (TF-IDF) operator (asap::tfidf) takes as input a list of asap::word_catalog objects, each one corresponding to a distinct file. It also requires a pre-computed asap::word_catalog object that lists the number of files each word occurs in. The method performs a processing step on these objects to calculate the TF-IDF score. It produces a data set using sparse vectors that compactly stores the TF-IDF scores. Example usage of the asap::tfidf, in conjunction with asap::word_catalog is provided in tfidf_mix.cpp.</p>
+<p>The asap::tfidf_by_words method is similar to asap:tfidf. The distinction between these methods is that asap::tfidf produces one vector of TF-IDF scores per input file, whereas asap::tfidf_by_words produces one vector per word. The difference in processing time is minimal. It is much faster to select the method that generates data in the appropriate format compared to transposing the data set.</p>
+<p>The program tfidf_mix.cpp implements multiple variants, using different data structures in different steps. The best options to use are &#8216;-c HLHHH&#8217; when the output should not be sorted by words, and &#8216;-c HLHLI -s&#8217; when the words should be sorted alphabetically in the output.</p>
+</div>
+<div class="section" id="k-means-clustering">
+<h3>K-Means clustering<a class="headerlink" href="#k-means-clustering" title="Permalink to this headline">¶</a></h3>
+<p>The K-means clustering operator is implemented through the asap::kmeans_operator class that encapsulates the state and methods related to K-means clustering. It stores the data in a asap::kmeans_data_set, a special type of asap::data_set, that stores additional data relevant to K-Means clustering, such as the cluster centers and the Sum of Squared Errors (SSE) score for the clusering. Typcially, the input points are sparse vectors while cluster centers are dense vectors. The operator further normalizes the coordinates in order to improve convergence.</p>
+<p>The K-Means clustering operator uses the extended vector types to store additional information on the cluster centers. In particular, it uses asap::vector_with_add_counter to count the number of points mapped to a cluster and it uses asap::vector_with_sqnorm_cache to speedup the calculation of the Euclidean distance between a point and a cluster center. The latter optimization allows to compute the Euclidean distance between a dense vector and a sparse vector by considering that each coordinate of the sparse vector corresponds to a deviation to the norm of the dense vector. The time complexity of this operation is proportional to the number of non-zeroes in the sparse vector, which is typically much less than the length of the vector.</p>
+</div>
+</div>
+<div class="section" id="installation-deployment">
+<h2>Installation &amp; Deployment<a class="headerlink" href="#installation-deployment" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="install-the-compiler">
 <h3>Install the compiler<a class="headerlink" href="#install-the-compiler" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic">
-<li><p class="first">Checkout swan_llvm: git clone <a class="reference external" href="https://github.com/project-asap/swan_llvm.git">https://github.com/project-asap/swan_llvm.git</a></p>
-</li>
-<li><p class="first">Move to clang: cd swan_llvm/tools</p>
-</li>
-<li><p class="first">Checkout swan_clang: git clone <a class="reference external" href="https://github.com/project-asap/swan_clang.git">https://github.com/project-asap/swan_clang.git</a></p>
-</li>
-<li><p class="first">Move to compiler-rt directory: cd ../projects/compiler-rt</p>
-</li>
-<li><dl class="first docutils">
-<dt>Create and move to build directory: mkdir build</dt>
-<dd><p class="first last">cd build</p>
-</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt>Build LLVM: cmake -G &#8220;Unix Makefiles&#8221; ../llvm</dt>
-<dd><p class="first last">make clean
-make</p>
-</dd>
-</dl>
-</li>
+<ol class="arabic simple">
+<li>Checkout swan_llvm:</li>
 </ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>git clone https://github.com/project-asap/swan_llvm.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Move to clang:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd swan_llvm/tools
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Checkout swan_clang:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>git clone https://github.com/project-asap/swan_clang.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="4">
+<li>Move to compiler-rt directory:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd ../projects/compiler-rt
+</pre></div>
+</div>
+<ol class="arabic simple" start="5">
+<li>Create and move to build directory:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>mkdir build
+cd build
+</pre></div>
+</div>
+<ol class="arabic simple" start="6">
+<li>Build LLVM:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cmake -G &quot;Unix Makefiles&quot; ../llvm
+make clean
+make
+</pre></div>
+</div>
 </div>
 <div class="section" id="install-the-runtime">
 <h3>Install the runtime<a class="headerlink" href="#install-the-runtime" title="Permalink to this headline">¶</a></h3>
-<ol class="arabic">
-<li><p class="first">Checkout swan_runtime: git clone <a class="reference external" href="https://github.com/project-asap/swan_runtime.git">https://github.com/project-asap/swan_runtime.git</a></p>
-</li>
-<li><p class="first">Move to swan_runtime directory: cd swan_runtime</p>
-</li>
-<li><dl class="first docutils">
-<dt>Build the Swan runtime: libtoolize</dt>
-<dd><p class="first last">aclocal
-automake &#8211;add-missing
-autoconf
-./configure &#8211;prefix=&lt;swan_runtime&gt;/swan_runtime/lib CC=../build/bin/clang CXX=../build/bin/clang++
-make clean
-make</p>
-</dd>
-</dl>
-</li>
+<ol class="arabic simple">
+<li>Checkout swan_runtime:</li>
 </ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>git clone https://github.com/project-asap/swan_runtime.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Move to swan_runtime directory:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd swan_runtime
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Build the Swan runtime:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>libtoolize
+aclocal
+automake --add-missing
+autoconf
+./configure --prefix=&lt;swan_runtime&gt;/swan_runtime/lib CC=../build/bin/clang CXX=../build/bin/clang++
+make clean
+make
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="tests">
 <h2>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h2>
 <p>Test clang:</p>
-<ol class="arabic">
-<li><p class="first">Move to swan directory: cd swan</p>
-</li>
-<li><dl class="first docutils">
-<dt>Execute: clang &#8211;help</dt>
-<dd><p class="first last">clang++ &#8211;help
+<ol class="arabic simple">
+<li>Move to swan directory:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd swan
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Execute:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>clang --help
+clang++ --help
 clang llvm/utils/count/count.c -fsyntax-only
 clang llvm/utils/count/count.c -S -emit-llvm -o -
 clang llvm/utils/count/count.c -S -emit-llvm -o - -O3
-clang llvm/utils/count/count.c -S -O3 -o -</p>
-</dd>
-</dl>
-</li>
-</ol>
+clang llvm/utils/count/count.c -S -O3 -o -
+</pre></div>
+</div>
 <p>Test swan:</p>
 <ol class="arabic simple">
-<li>Checkout swan_tests: git clone <a class="reference external" href="https://github.com/project-asap/swan_tests.git">https://github.com/project-asap/swan_tests.git</a></li>
-<li>Move to swan_tests directory: cd swan_tests</li>
-<li>Execute: make CXX=../build/bin/clang++ SWANRTDIR=../swan_runtime test</li>
+<li>Checkout swan_tests:</li>
 </ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>git clone https://github.com/project-asap/swan_tests.git
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li>Move to swan_tests directory:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd swan_tests
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li>Execute:</li>
+</ol>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>make CXX=../build/bin/clang++ SWANRTDIR=../swan_runtime test
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -168,12 +416,43 @@ clang llvm/utils/count/count.c -S -O3 -o -</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Analytics Programming Model - SWAN Compiler</a><ul>
+<li><a class="reference internal" href="#">Swan Operators</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
-<li><a class="reference internal" href="#design">Design</a></li>
-<li><a class="reference internal" href="#algorithm">Algorithm</a></li>
+<li><a class="reference internal" href="#swan-an-extension-of-the-cilk-parallel-programming-language">Swan: An Extension of the Cilk Parallel Programming Language</a><ul>
+<li><a class="reference internal" href="#spawn-and-sync">Spawn and Sync</a></li>
+<li><a class="reference internal" href="#paraller-for-loops">Paraller for loops</a></li>
+<li><a class="reference internal" href="#generalized-reductions">Generalized Reductions</a></li>
+<li><a class="reference internal" href="#array-notation">Array Notation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#swan-s-extensions-to-cilk">Swan&#8217;s Extensions to Cilk</a><ul>
+<li><a class="reference internal" href="#dataflow-dependences">Dataflow dependences</a></li>
+<li><a class="reference internal" href="#performance-hints-for-parallel-for-loops">Performance hints for parallel for loops</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-asap-operator-library-for-text-analytics">The ASAP operator library for text analytics</a><ul>
+<li><a class="reference internal" href="#vector-types">Vector types</a></li>
+<li><a class="reference internal" href="#extended-vector-types">Extended vector types</a></li>
+<li><a class="reference internal" href="#vector-set-type">Vector set type</a></li>
+<li><a class="reference internal" href="#word-banks">Word banks</a></li>
+<li><a class="reference internal" href="#word-containers">Word containers</a></li>
+<li><a class="reference internal" href="#data-set-type">Data set type</a></li>
+<li><a class="reference internal" href="#auxiliary">Auxiliary</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#setup">Setup</a></li>
-<li><a class="reference internal" href="#install">Install</a><ul>
+<li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#input-output-formats">Input/Output formats</a><ul>
+<li><a class="reference internal" href="#weka-file-format">WEKA file format</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#analytics-operators">Analytics Operators</a><ul>
+<li><a class="reference internal" href="#term-frequency">Term frequency</a></li>
+<li><a class="reference internal" href="#tf-idf">TF-IDF</a></li>
+<li><a class="reference internal" href="#k-means-clustering">K-Means clustering</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#installation-deployment">Installation &amp; Deployment</a><ul>
 <li><a class="reference internal" href="#install-the-compiler">Install the compiler</a></li>
 <li><a class="reference internal" href="#install-the-runtime">Install the runtime</a></li>
 </ul>
@@ -186,7 +465,7 @@ clang llvm/utils/count/count.c -S -O3 -o -</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="spark.html" title="previous chapter">Extension of Apache Spark</a></li>
+      <li>Previous: <a href="spark.html" title="previous chapter">Extension of the Apache Spark</a></li>
       <li>Next: <a href="telecom_analytics.html" title="next chapter">Telecommunication Analytics</a></li>
   </ul></li>
 </ul>
