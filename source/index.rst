@@ -14,7 +14,7 @@ Contents:
    :maxdepth: 2
 
    intro
-   arch
    install
-   implementation
+   rest
+   operator-workflow-definition
 

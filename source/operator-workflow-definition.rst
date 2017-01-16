@@ -2,22 +2,11 @@
 Workflow and Operator Definition
 #############################################
 
-In this section, we describe in detail the current implementation of the IReS platform [7] . We discuss the functionalities provided by the different modules of the platform as well as the intuition behind the architectural and algorithmic decisions made. The code of the IReS platform is open  source and can be found in https://github.com/project-asap/IReS-Platform. 
-
-===================
-Job Parsing Module 
-===================
-
-This module is responsible for handling the interaction between the users and the IReS platform. A user should be able to define operators, datasets, workflows, etc. along with their  properties  and  restrictions  using  a  common  description  framework.  The  **Job parsing** module is thus responsible for both  defining this description framework and being able to parse and utilize the user provided input.  The main challenges of defining such a metadata description framework are:
-
-* **User extensibility** : Users should be able to define and add their own metadata for operators and datasets. User defined metadata can be used for fine-grained operator  description.  Using  a  predefined  set  of  metadata  could  hinder  the extensibility of the platform for supporting new engines and operators.
-* **Abstraction** : The  IReS  platform  targets  the  optimization  of  multi-engine workflows,  examining  alternative  execution  paths  of  the  same  conceptual workflow, using various underlying engine and operator implementations. To be able to describe such scenarios, the user should be able to specify the data and operators that compose her workflow in a way as abstract as she desires. The IReS planner and workflow scheduler need to remove that abstraction, find all the alternative ways of materializing the workflow and select the most beneficial, according to the user-defined policy.  
-
 =========================
 Tree-metadata framework 
 =========================
 
-Our proposed metadata framework describes data and operators. Data and operators can be either abstract or materialized. Abstract are the operators and datasets that are described partially or at a high level by the user when composing her workflow whereas materialized  are  the  actual  operator  implementations  and  existing  datasets,  either provided by the user or residing in a repository. Both data and operators need to be accompanied by a set of metadata, i.e., properties that  describe  them.  Such  properties  include  input  data  types  and  parameters  of operators,  location  of  data  objects  or  operator  invocation  scripts,  data  schemata, implementation details, engines etc. The provided metadata can be used to:  
+The metadata framework describes data and operators. Data and operators can be either abstract or materialized. Abstract are the operators and datasets that are described partially or at a high level by the user when composing her workflow whereas materialized  are  the  actual  operator  implementations  and  existing  datasets,  either provided by the user or residing in a repository. Both data and operators need to be accompanied by a set of metadata, i.e., properties that  describe  them.  Such  properties  include  input  data  types  and  parameters  of operators,  location  of  data  objects  or  operator  invocation  scripts,  data  schemata, implementation details, engines etc. The provided metadata can be used to:  
 
 a. Match abstract operators to materialized ones
 
@@ -33,13 +22,17 @@ Constraints
 
 This sub-tree contains all the meta-data information that is used to match abstract and materialized operators and datasets. The information contained in this sub-tree should contain  input/output  specification  for  operators,  algorithm,  engine  specification  and whatever  else  the  user  considers  that  should  take  part  in  the  abstract/materialized matching of operators. The predefined, compulsory fields of the operator metadata are primarily the number of its inputs and outputs: 
 
-| Constraints.Input.number=<number of inputs>
-| Constraints.Output.number=<number of outputs> 
+.. code:: bash
+
+	Constraints.Input.number=<number of inputs>
+	Constraints.Output.number=<number of outputs> 
 
 In the above description, the metadata were presented with a key-value representation were the key denotes the path from the root node of the tree to the specified metadata leaf. For each defined input and output the respective specification metadata should be put in the following subtrees:  
 
-| Constraints.Input{id} 
-| Constraints.Output{id} 
+.. code:: bash
+
+	Constraints.Input{id} 
+	Constraints.Output{id} 
 
 The respective metadata subtrees are automatically matched with the existing datasets in order to check for usability or move/transform operators that should be applied. The respective  output  metadata  specifications  are  also copied  to  the  metadata  of  the intermediate output workflow datasets in order to enforce data constraints along the workflow.
 
@@ -54,12 +47,15 @@ Execution.path=<the path of the dataset>
 
 For operators we have the following metadata: 
 
-| Execution.LuaScript=<Lua script of the operator> 
-| Execution.Arguments.number=<number of arguments of the execution script> 
-| Execution.Argument{id}=<value of the specific argument>
-| Execution.Output{id}.path=<the path of the specific output dataset> 
-| Execution.copyToLocal=<list  of  files  that  need  to  be  copied  in  the  container  before  the execution of the operator> 
-| Execution.copyFromLocal=<list of files that need to be maintained after the execution of the operator> 
+
+.. code:: bash
+
+	Execution.LuaScript=<Lua script of the operator> 
+	Execution.Arguments.number=<number of arguments of the execution script> 
+	Execution.Argument{id}=<value of the specific argument>
+	Execution.Output{id}.path=<the path of the specific output dataset> 
+	Execution.copyToLocal=<list  of  files  that  need  to  be  copied  in  the  container  before  the execution of the operator> 
+	Execution.copyFromLocal=<list of files that need to be maintained after the execution of the operator> 
 
 The  use  of  those  metadata  is  further  described  in  the Enforcer section. In  general,  these  metadata  give  information  about  the location of execution script for the operator as well as for its arguments. We also give information  about  stage  in  and  stage  out  files  that  are  required  by  the  distributed execution of operators using YARN containers. 
 
@@ -69,9 +65,11 @@ Optimization
 
 This part of the metadata gives information required by the profiler module. They are used  to  effectively  estimate  the  execution  metrics of  operators  and  utilize  them  to generate execution plans for workflows.  
 
-| Optimization.inputSpace.{metric name}=<type> 
-| Optimization.outputSpace.{metric name}=<type> 
-| Optimization.model.{metric name}=<UserFunction or Profile> 
+.. code:: bash
+
+	Optimization.inputSpace.{metric name}=<type> 
+	Optimization.outputSpace.{metric name}=<type> 
+	Optimization.model.{metric name}=<UserFunction or Profile> 
 
 As can be seen from the above metadata, users are able to define the input/output profiling space for each materialized operator. For each of the output  metrics  the  user  is  able  to  either  provide  a  user  defined  function,  used  for estimation, or state to the system that the metric should be estimated using a profiling procedure.  In the following sections, we give some concrete examples for the metadata of datasets and  operators.  For  better  understanding  we  give  both  a  visual  representation  of  the metadata  tree  as  can  be  seen  from  the  platform’s  web  interface  and  also  the  actual metadata in key-values where the key denotes the path of the specific metadata node. 
 
@@ -80,10 +78,12 @@ Dataset metadata description
 -----------------------------
 In this section, we give an example of a dataset description (Figure 4).
 
-| Optimization.documents=2000 
-| Constraints.Engine.FS=HDFS  
-| Constraints.type=SequenceFile 
-| Execution.path=hdfs:///user/root/asapDataAll 
+.. code:: bash
+
+	Optimization.documents=2000 
+	Constraints.Engine.FS=HDFS  
+	Constraints.type=SequenceFile 
+	Execution.path=hdfs:///user/root/asapDataAll 
 
 .. figure:: datasetmeta.png
 	
@@ -112,9 +112,11 @@ In this section, we give an example of an abstract operator description (Figure 
 
 Abstract operator metadata 
 
-| Constraints.Output.number=1 
-| Constraints.Input.number=1 
-| Constraints.OpSpecification.Algorithm.name=TF_IDF 
+.. code:: bash
+
+	Constraints.Output.number=1 
+	Constraints.Input.number=1 
+	Constraints.OpSpecification.Algorithm.name=TF_IDF 
 
 As  we  can  see,  the  abstract  operator  contains  metadata  only  under  the  constraints subtree because only those are used for the matching procedure. It mainly targets the matching of the algorithmic operation of the operators as well as the matching of inputs and  outputs  used.  This  operator  matches  with  the  materialized  TF_IDF  operator presented in the previous section.
 
@@ -129,11 +131,13 @@ In this section, we present the description of an abstract workflow. The user of
 
 An abstract workflow is defined as a DAG graph that connects a mixture of abstract and materialized datasets and operators. The missing information needed for describing the DAG graph is a set of edges. For example the description of the previous workflow can be created using the following list of edges (d1 is the output of TF_IDF and d2 is the output of k-Means). 
 
-| crawlDocuments,TF_IDF,0 
-| TF_IDF,d1,0
-| d1,k-Means,0 
-| k-Means,d2,0 
-| d2,$$target
+.. code:: bash
+
+	crawlDocuments,TF_IDF,0 
+	TF_IDF,d1,0
+	d1,k-Means,0 
+	k-Means,d2,0 
+	d2,$$target
 
 .. figure:: abstractworkflow.png
 	
@@ -141,18 +145,24 @@ An abstract workflow is defined as a DAG graph that connects a mixture of abstra
 
 For each edge definition the input position should be defined at the end of each line. For example, in this line 
 
-| crawlDocuments,TF_IDF,0 
+.. code:: bash
+
+	crawlDocuments,TF_IDF,0 
 
 The "0" defines that the crawlDocuments dataset is the first input to the TF_IDF operator. Also in the following line
 
-| k-Means,d2,0 
+.. code:: bash
+
+	k-Means,d2,0 
 
 the "0" again defines that the output of k-Means is the first input of d2. Let's assume a workflow consisting of operators with more than one inputs.
 
-| in0,test,0
-| in1,test,1
-| test,o0,0
-| test,o1,1
+.. code:: bash
+
+	in0,test,0
+	in1,test,1
+	test,o0,0
+	test,o1,1
 
 In this example the *test* operator takes two inputs. The first input to this operator is the *in0* while the second is the *in1*.
 
