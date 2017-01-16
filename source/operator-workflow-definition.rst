@@ -127,7 +127,7 @@ As  we  can  see,  the  abstract  operator  contains  metadata  only  under  the
 ------------------------------
 Abstract workflow description 
 ------------------------------
-In this section, we present the description of an abstract workflow. The user of the IReS platform has the ability to describe a workflow in an abstract way and the let the system find all possible matches for the operators and generate the materialized workflow that contains  all  the  possible  alternative  execution  plans.  An  abstract  workflow  can  be created  using  both  materialized  and  abstract  datasets  and  operators.  Materialized datasets are used to define the already existing input datasets of the workflow. Abstract datasets  can  be  used  for  defining  the  intermediate results  that  are  created  after  the execution of a specific operator. These abstract datasets will get concrete specifications from the materialized operator’s output specifications when the materialized workflow is generated. Concerning operators, the user can create her workflow using materialized operators that exist in the operator library or abstract operators that match with several of the existing materialized operators. An example of an abstract workflow is depicted in Figure 7. 
+This section describes the definition of an abstract workflow. The user of the IReS platform has the ability to describe a workflow in an abstract way and the let the system find all possible matches for the operators and generate the materialized workflow that contains  all  the  possible  alternative  execution  plans.  An  abstract  workflow  can  be created  using  both  materialized  and  abstract  datasets  and  operators.  Materialized datasets are used to define the already existing input datasets of the workflow. Abstract datasets  can  be  used  for  defining  the  intermediate results  that  are  created  after  the execution of a specific operator. These abstract datasets will get concrete specifications from the materialized operator’s output specifications when the materialized workflow is generated. Concerning operators, the user can create her workflow using materialized operators that exist in the operator library or abstract operators that match with several of the existing materialized operators. An example of an abstract workflow is depicted in Figure 7. 
 
 An abstract workflow is defined as a DAG graph that connects a mixture of abstract and materialized datasets and operators. The missing information needed for describing the DAG graph is a set of edges. For example the description of the previous workflow can be created using the following list of edges (d1 is the output of TF_IDF and d2 is the output of k-Means). 
 
@@ -171,12 +171,12 @@ A  special  tag  $$target  is  used  to  define  which  dataset  is  the  final 
 ================
 Enforcer module 
 ================
-In  this  Section,  we  describe  the  enforcer  module8 of  the  IReS  platform.  This  module undertakes the execution of the selected execution plan. In the era of big data, clusters of commodity  servers  as  well  as  clusters  of  cloud  resources  have  become  the  primary computing platform choice. Such clusters power large Internet services and a growing number  of  data-intensive  applications.  Additionally,  a  large  and  diverse  selection  of computing frameworks has been and is being developed in order to take advantage of those  cluster  resources.  In  this  landscape,  where  organizations  run  multiple  cluster computing  frameworks  and  in  which  each  framework  has  its  own  advantages  and disadvantages,  a  cluster  multiplexing  approach  emerges  as  the  best  solution  for resource utilization. Resource allocation and scheduling frameworks like Yarn and Mesos have  been  introduced.  Those  frameworks  target  the fine-grained  resource allocation, in a container level, as well as the online resource scheduling and sharing between various cluster-computing frameworks.  In order for the IReS platform to be able to fit in this landscape and integrate with the various cluster computing frameworks, we have build our enforcer module on top of the YARN  resource  scheduler.  Our  enforcer  module  requests  container  resources  from YARN in order to launch the execution of operators. It also orchestrates the execution of a  DAG  graph  of  operators  in  order  to  successfully  execute  the  selected  workflow execution plans.
+This  module undertakes the execution of the selected execution plan. The enforcer module is build on top of the YARN  resource  scheduler.  The  enforcer  module  requests  container  resources  from YARN in order to launch the execution of operators. It also orchestrates the execution of a  DAG  graph  of  operators  in  order  to  successfully  execute  the  selected  workflow execution plans.
 
 -------------------------------
 YARN workflow execution engine 
 -------------------------------
-In order to provide the above-mentioned functionality, our enforcer module extends the Apache  Kitten framework. Apache  Kitten  is  a  framework  that  lets you  define  the execution  of  operators  on  top  of  YARN.  It  allows  the  description  of  resource configuration  (CPU,  RAM  etc.  of  the  containers  launched)  as  well  as  the  execution configuration of the script or commands that need to be executed inside the allocated container resources. We extend Apache Kitten in order to add support for the execution of a DAG of operators that is required for our workflow execution. Apache Kitten is a set of tools for writing and running applications on YARN, the general purpose resource scheduling framework that ships with Hadoop 2.2.0. Kitten handles the boilerplate around configuring and launching YARN containers, allowing developers to easily deploy distributed applications that run under YARN. Kitten makes extensive use  of  Lua  tablesto  organize  information  about  how  a  YARN  application  should  be executed. Here is how Kitten defines an example of a distributed shell application: 
+The enforcer module extends the Apache  Kitten framework. Apache  Kitten  is  a  framework  that  lets you  define  the execution  of  operators  on  top  of  YARN.  It  allows  the  description  of  resource configuration  (CPU,  RAM  etc.  of  the  containers  launched)  as  well  as  the  execution configuration of the script or commands that need to be executed inside the allocated container resources. Kitten makes extensive use  of  Lua  tables to  organize  information  about  how  a  YARN  application  should  be executed. Here is how Kitten defines an example of a distributed shell application: 
 
 .. code:: javascript
 
@@ -223,17 +223,19 @@ Execution description
 ----------------------
 All  materialized  operators  are  accompanied  by  a  set  of execution  metadata  that  are  used  for  their  actual  execution.  The  main  part  of  the execution description is the lua script that was mentioned in the previous section and is used  to  describe  the  execution  details  of  an  operator.  An  example  description  of  an operator using a lua script is presented below: 
 
--- The command to execute. 
-SHELL_COMMAND = "./tfidf_mahout.sh" 
+.. bash:
 
--- The number of containers to run it on. 
-CONTAINER_INSTANCES = 1 
+	-- The command to execute. 
+	SHELL_COMMAND = "./tfidf_mahout.sh" 
 
---  The  location  of  the  jar  file  containing  kitten's  default  ApplicationMaster implementation. 
-MASTER_JAR_LOCATION = "kitten-master-0.2.0-jar-with-dependencies.jar" 
+	-- The number of containers to run it on. 
+	CONTAINER_INSTANCES = 1 
 
--- CLASSPATH setup. 
-CP = "/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/share/hadoop/common/lib/*:/opt/hadoop-2.6.0/share/hadoop/common/*:/opt/hadoop-2.6.0/share/hadoop/hdfs:/opt/hadoop-2.6.0/share/hadoop/hdfs/lib/*:/opt/hadoop-2.6.0/share/hadoop/hdfs/*:/opt/hadoop-2.6.0/share/hadoop/yarn/lib/*:/opt/hadoop-2.6.0/share/hadoop/yarn/*:/opt/hadoop-2.6.0/share/hadoop/mapreduce/lib/*:/opt/hadoop-2.6.0/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar:/opt/hadoop-2.6.0/share/hadoop/yarn/*:/opt/hadoop-2.6.0/share/hadoop/yarn/lib/*" 
+	--  The  location  of  the  jar  file  containing  kitten's  default  ApplicationMaster implementation. 
+	MASTER_JAR_LOCATION = "kitten-master-0.2.0-jar-with-dependencies.jar" 
+
+	-- CLASSPATH setup. 
+	CP = "/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/etc/hadoop:/opt/hadoop-2.6.0/share/hadoop/common/lib/*:/opt/hadoop-2.6.0/share/hadoop/common/*:/opt/hadoop-2.6.0/share/hadoop/hdfs:/opt/hadoop-2.6.0/share/hadoop/hdfs/lib/*:/opt/hadoop-2.6.0/share/hadoop/hdfs/*:/opt/hadoop-2.6.0/share/hadoop/yarn/lib/*:/opt/hadoop-2.6.0/share/hadoop/yarn/*:/opt/hadoop-2.6.0/share/hadoop/mapreduce/lib/*:/opt/hadoop-2.6.0/share/hadoop/mapreduce/*:/contrib/capacity-scheduler/*.jar:/opt/hadoop-2.6.0/share/hadoop/yarn/*:/opt/hadoop-2.6.0/share/hadoop/yarn/lib/*" 
 
 -- Resource and environment setup. 
 
