@@ -15,7 +15,7 @@ Contents:
 
    intro
    wmt
-   ires_docs/ires_index
+   ires_docs/index_ires
    spark
    swan
    telecom_analytics

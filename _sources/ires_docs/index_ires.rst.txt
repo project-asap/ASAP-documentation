@@ -5,15 +5,17 @@
 
 .. image:: asap_logo.jpg
 
-IReS
-====
+
+Intelligent Multi-Engine Resource Scheduler
+==============================================
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
    intro
-   arch
    install
-   implementation
+   rest
+   operator-workflow-definition
 

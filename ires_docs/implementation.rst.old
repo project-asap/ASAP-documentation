@@ -2,7 +2,7 @@
 Workflow and Operator Definition
 #############################################
 
-In this section, we describe in detail the current implementation of the IReS platform [7] . We discuss the functionalities provided by the different modules of the platform as well as the intuition behind the architectural and algorithmic decisions made. The code of the IReS platform is open  source and can be found in https://github.com/project-asap/IReS-Platform. 
+In this section, we describe in detail the current implementation of the IReS platform. We discuss the functionalities provided by the different modules of the platform as well as the intuition behind the architectural and algorithmic decisions made. The code of the IReS platform is open  source and can be found in https://github.com/project-asap/IReS-Platform. 
 
 ===================
 Job Parsing Module 
@@ -129,22 +129,39 @@ In this section, we present the description of an abstract workflow. The user of
 
 An abstract workflow is defined as a DAG graph that connects a mixture of abstract and materialized datasets and operators. The missing information needed for describing the DAG graph is a set of edges. For example the description of the previous workflow can be created using the following list of edges (d1 is the output of TF_IDF and d2 is the output of k-Means). 
 
-| crawlDocuments,TF_IDF 
-| TF_IDF,d1 
-| d1,k-Means 
-| k-Means,d2 
-| d2,$$target 
+| crawlDocuments,TF_IDF,0 
+| TF_IDF,d1,0
+| d1,k-Means,0 
+| k-Means,d2,0 
+| d2,$$target
 
 .. figure:: abstractworkflow.png
 	
 	Abstract Workflow Description
+
+For each edge definition the input position should be defined at the end of each line. For example, in this line 
+
+| crawlDocuments,TF_IDF,0 
+
+The "0" defines that the crawlDocuments dataset is the first input to the TF_IDF operator. Also in the following line
+
+| k-Means,d2,0 
+
+the "0" again defines that the output of k-Means is the first input of d2. Let's assume a workflow consisting of operators with more than one inputs.
+
+| in0,test,0
+| in1,test,1
+| test,o0,0
+| test,o1,1
+
+In this example the *test* operator takes two inputs. The first input to this operator is the *in0* while the second is the *in1*.
 
 A  special  tag  $$target  is  used  to  define  which  dataset  is  the  final  output  of  the  DAG graph.
 
 ================
 Enforcer module 
 ================
-In  this  Section,  we  describe  the  enforcer  module8 of  the  IReS  platform.  This  module undertakes the execution of the selected execution plan. In the era of big data, clusters of commodity  servers  as  well  as  clusters  of  cloud  resources  have  become  the  primary computing platform choice. Such clusters power large Internet services and a growing number  of  data-intensive  applications.  Additionally,  a  large  and  diverse  selection  of computing frameworks has been and is being developed in order to take advantage of those  cluster  resources.  In  this  landscape,  where  organizations  run  multiple  cluster computing  frameworks  and  in  which  each  framework  has  its  own  advantages  and disadvantages,  a  cluster  multiplexing  approach  emerges  as  the  best  solution  for resource utilization. Resource allocation and scheduling frameworks like Yarn and Mesos have  been  introduced.  Those  frameworks  target  the fine-grained  resource allocation, in a container level, as well as the online resource scheduling and sharing between various cluster-computing frameworks.  In order for the IReS platform to be able to fit in this landscape and integrate with the various cluster computing frameworks, we have build our enforcer module on top of the YARN  resource  scheduler.  Our  enforcer  module  requests  container  resources  from YARN in order to launch the execution of operators. It also orchestrates the execution of a  DAG  graph  of  operators  in  order  to  successfully  execute  the  selected  workflow execution plans.
+In  this  Section,  we  describe  the  enforcer  module of  the  IReS  platform.  This  module undertakes the execution of the selected execution plan. In the era of big data, clusters of commodity  servers  as  well  as  clusters  of  cloud  resources  have  become  the  primary computing platform choice. Such clusters power large Internet services and a growing number  of  data-intensive  applications.  Additionally,  a  large  and  diverse  selection  of computing frameworks has been and is being developed in order to take advantage of those  cluster  resources.  In  this  landscape,  where  organizations  run  multiple  cluster computing  frameworks  and  in  which  each  framework  has  its  own  advantages  and disadvantages,  a  cluster  multiplexing  approach  emerges  as  the  best  solution  for resource utilization. Resource allocation and scheduling frameworks like Yarn and Mesos have  been  introduced.  Those  frameworks  target  the fine-grained  resource allocation, in a container level, as well as the online resource scheduling and sharing between various cluster-computing frameworks.  In order for the IReS platform to be able to fit in this landscape and integrate with the various cluster computing frameworks, we have build our enforcer module on top of the YARN  resource  scheduler.  Our  enforcer  module  requests  container  resources  from YARN in order to launch the execution of operators. It also orchestrates the execution of a  DAG  graph  of  operators  in  order  to  successfully  execute  the  selected  workflow execution plans.
 
 -------------------------------
 YARN workflow execution engine 
