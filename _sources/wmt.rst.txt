@@ -46,11 +46,7 @@ WMT provides a GUI to enable users to design workflows and perform analysis and 
 Link
 ####
 
-The code of the WMT can be found in:
-
-.. code:: bash
-
-	<https://github.com/project-asap/workflow.git>
+The code of the WMT can be found in:  <https://github.com/project-asap/workflow.git>
 
 
 
@@ -91,12 +87,21 @@ d. Start nginx:
 
 	sudo service nginx start
 
-
+e. Point your browser to the node where WMT is running. Default installation is at http://localhost:8888/
 
 Tests
 #####
 
-To run tests, do python -m unittest -v testmain in the directory pub/py/ Currently, the following functions have test coverage:
+To run tests:
+
+.. code:: bash
+
+	python -m unittest -v testmain 
+
+
+in the directory pub/py/ 
+
+Currently, the following functions have test coverage:
 
 1. *analyse()* - comparison of its result with the presaved result in a file testwl-a.json
 2. *save()* - checking that save function generates a file with correct name
