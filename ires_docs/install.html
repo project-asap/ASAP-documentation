@@ -17,8 +17,7 @@
         VERSION:     '0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
+        HAS_SOURCE:  true
       };
     </script>
     <script type="text/javascript" src="../_static/jquery.js"></script>
@@ -103,6 +102,22 @@ Cluster Monitoring</p>
 Run ASAP server web user interface at <a class="reference external" href="http://your_hostname:1323/web/main">http://your_hostname:1323/web/main</a>. IReS home page should be displayed.
 Run a workflow, for example run &#8220;hello_world&#8221; from &#8220;Abstrack Workflows&#8221; tab and see what happens not only in IReS web interface but also in YARN and HDFS web interfaces. Make sure that YARN has been started before running any workflow.
 Click on &#8220;Cockpit&#8221; tab to verify that the expected services to run are really running.</p>
+</div>
+<div class="section" id="monitor">
+<h3>Monitor<a class="headerlink" href="#monitor" title="Permalink to this headline">¶</a></h3>
+<p>The Monitor is responsible for the profiling of the operators in every workflow execution. It keeps the execution metrics (eg execution time, number of cores etc) in a dictionary format and stores them into a MongoDB server. To install the Monitor:</p>
+<ol class="arabic simple">
+<li>Install MongoDB. You can follow <a class="reference external" href="https://docs.mongodb.com/manual/administration/install-on-linux/">this tutorial</a>.</li>
+<li>Copy the &#8216;asap-tools&#8217; <a class="reference external" href="https://github.com/project-asap/IReS-Platform/tree/master/asap-tools">subproject</a> to every IReS node and also install the required dependencies.</li>
+<li>Set the full path of the <cite>asap (asap-tools/bin/asap)</cite> script in the <cite>asap.path parameters of the `asap.properties(asap-server/target/conf/asap.properties)</cite> file.</li>
+<li>In each node create a file <cite>/etc/reporter_config.json</cite> with the following content:</li>
+</ol>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+   <span class="s2">&quot;backend&quot;</span><span class="p">:</span> <span class="s2">&quot;mongo&quot;</span><span class="p">,</span>
+   <span class="s2">&quot;host&quot;</span><span class="p">:</span><span class="s2">&quot;the_mongo_db_host&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 <div class="section" id="running-the-helloworld-workflow">
@@ -608,6 +623,7 @@ Execution.Output0.path=$HDFS_OP_DIR/kmeans.out
 <li><a class="reference internal" href="#run-install-sh">Run install.sh</a></li>
 <li><a class="reference internal" href="#validate-installation">Validate installation</a></li>
 <li><a class="reference internal" href="#start-the-ires-server">Start the IReS server</a></li>
+<li><a class="reference internal" href="#monitor">Monitor</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#running-the-helloworld-workflow">Running the HelloWorld workflow</a></li>
@@ -653,7 +669,7 @@ Execution.Output0.path=$HDFS_OP_DIR/kmeans.out
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/ires_docs/install.rst.txt"
+      <li><a href="../_sources/ires_docs/install.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -675,11 +691,11 @@ Execution.Output0.path=$HDFS_OP_DIR/kmeans.out
       &copy;2016, Asap consortium.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.9</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
       
       |
-      <a href="../_sources/ires_docs/install.rst.txt"
+      <a href="../_sources/ires_docs/install.txt"
           rel="nofollow">Page source</a>
     </div>
 
