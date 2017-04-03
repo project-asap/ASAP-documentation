@@ -26,8 +26,8 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="top" title="Asap 0.0 documentation" href="index.html" />
-    <link rel="prev" title="Analytics Programming Model - SWAN Compiler" href="swan.html" />
+    <link rel="next" title="Guidelines for bootstraping ASAP cluster and running the WIND use case" href="guidelines.html" />
+    <link rel="prev" title="Swan Operators" href="swan.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -91,19 +91,15 @@
 <p>$SPARK_HOME/bin/spark-submit &#8211;py-files cdr.py peak_detection/data_filter.py &lt;dataset&gt; &lt;spatial_division&gt; &lt;start_date&gt; &lt;end_date&gt;</p>
 <dl class="docutils">
 <dt>where:</dt>
-<dd><ul class="first last">
+<dd><ul class="first last simple">
 <li><dl class="first docutils">
 <dt>dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:</dt>
-<dd><p class="first last">user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type</p>
-</dd>
+<dd>user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type</dd>
 </dl>
 </li>
-<li><p class="first">spatial_division: File containing the mapping of cells to regions.</p>
-</li>
-<li><p class="first">start_date: The starting date of the analysis (format: %Y-%m-%d)</p>
-</li>
-<li><p class="first">end_date: The ending date of the analysis (format: %Y-%m-%d)</p>
-</li>
+<li>spatial_division: File containing the mapping of cells to regions.</li>
+<li>start_date: The starting date of the analysis (format: %Y-%m-%d)</li>
+<li>end_date: The ending date of the analysis (format: %Y-%m-%d)</li>
 </ul>
 </dd>
 </dl>
@@ -134,19 +130,15 @@ constructed starting from the CDR data and with reference to a particular spatia
 <p>Run:  $SPARK_HOME/bin/spark-submit &#8211;py-files cdr.py sociometer/user_profiling.py &lt;dataset&gt; &lt;spatial_division&gt; &lt;start_date&gt; &lt;end_date&gt;</p>
 <dl class="docutils">
 <dt>where:</dt>
-<dd><ul class="first last">
+<dd><ul class="first last simple">
 <li><dl class="first docutils">
 <dt>dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:</dt>
-<dd><p class="first last">user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type where start_time column is expected to have this format: &#8216;%Y-%m-%d %X&#8217;.</p>
-</dd>
+<dd>user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type where start_time column is expected to have this format: &#8216;%Y-%m-%d %X&#8217;.</dd>
 </dl>
 </li>
-<li><p class="first">spatial_division: File containing the mapping of cells to regions.</p>
-</li>
-<li><p class="first">start_date: The starting date of the analysis (format: %Y-%m-%d)</p>
-</li>
-<li><p class="first">end_date: The ending date of the analysis (format: %Y-%m-%d)</p>
-</li>
+<li>spatial_division: File containing the mapping of cells to regions.</li>
+<li>start_date: The starting date of the analysis (format: %Y-%m-%d)</li>
+<li>end_date: The ending date of the analysis (format: %Y-%m-%d)</li>
 </ul>
 </dd>
 </dl>
@@ -185,7 +177,8 @@ constructed starting from the CDR data and with reference to a particular spatia
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="swan.html" title="previous chapter">Analytics Programming Model - SWAN Compiler</a></li>
+      <li>Previous: <a href="swan.html" title="previous chapter">Swan Operators</a></li>
+      <li>Next: <a href="guidelines.html" title="next chapter">Guidelines for bootstraping ASAP cluster and running the WIND use case</a></li>
   </ul></li>
 </ul>
 </div>
@@ -214,8 +207,8 @@ constructed starting from the CDR data and with reference to a particular spatia
       &copy;2016, Asap consortium.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5a1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.9</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
       <a href="_sources/telecom_analytics.rst.txt"

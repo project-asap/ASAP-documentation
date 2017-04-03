@@ -19,4 +19,4 @@ Contents:
    spark
    swan
    telecom_analytics
-
+   guidelines

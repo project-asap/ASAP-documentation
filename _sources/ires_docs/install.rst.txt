@@ -86,6 +86,26 @@ Run ASAP server web user interface at http://your_hostname:1323/web/main. IReS h
 Run a workflow, for example run "hello_world" from "Abstrack Workflows" tab and see what happens not only in IReS web interface but also in YARN and HDFS web interfaces. Make sure that YARN has been started before running any workflow.
 Click on "Cockpit" tab to verify that the expected services to run are really running.
 
+--------
+Monitor
+--------
+The Monitor is responsible for the profiling of the operators in every workflow execution. It keeps the execution metrics (eg execution time, number of cores etc) in a dictionary format and stores them into a MongoDB server. To install the Monitor:
+
+1. Install MongoDB. You can follow `this tutorial <https://docs.mongodb.com/manual/administration/install-on-linux/>`_.
+
+2. Copy the 'asap-tools' `subproject <https://github.com/project-asap/IReS-Platform/tree/master/asap-tools>`_ to every IReS node and also install the required dependencies.
+
+3. Set the full path of the `asap (asap-tools/bin/asap)` script in the `asap.path parameters of the `asap.properties(asap-server/target/conf/asap.properties)` file.
+
+4. In each node create a file `/etc/reporter_config.json` with the following content:
+
+.. code:: bash
+
+	{
+	   "backend": "mongo",
+	   "host":"the_mongo_db_host"
+	}
+
 
 ================================
 Running the HelloWorld workflow

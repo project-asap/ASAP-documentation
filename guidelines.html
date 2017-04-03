@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Guidelines for bootstraping ASAP cluster and running the WIND use case &#8212; Asap 0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Telecommunication Analytics" href="telecom_analytics.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="guidelines-for-bootstraping-asap-cluster-and-running-the-wind-use-case">
+<h1>Guidelines for bootstraping ASAP cluster and running the WIND use case<a class="headerlink" href="#guidelines-for-bootstraping-asap-cluster-and-running-the-wind-use-case" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>The following guide directs the users to setup an ASAP cluster and run the sociometer use case provided by the WIND.</p>
+</div>
+<div class="section" id="create-vms">
+<h2>Create VMs<a class="headerlink" href="#create-vms" title="Permalink to this headline">¶</a></h2>
+<p>Prepare environment in the host machines:</p>
+<ul class="simple">
+<li>Install required packages <a class="reference external" href="http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22:26,%22gen%22:0%7D,%7B%22name%22:%22XYZ%22%7D,69,279,0%5D">Centos 7</a>, <a class="reference external" href="https://help.ubuntu.com/community/KVM/Installation#Install_Necessary_Packages">Ubuntu</a>:</li>
+<li>Create network bridge for letting the VMs to access to the LAN <a class="reference external" href="chrome-extension://jdbefljfgobbmcidnmpjamcbhnbphjnb/http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22%3A33%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C69%2C401%2C0%5D">Centos 7</a>, <a class="reference external" href="https://help.ubuntu.com/community/KVM/Networking#Creating_a_network_bridge_on_the_host">Ubuntu</a>)</li>
+<li>Download asap-master image</li>
+<li>Create asap-master VM:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>ASAP_MASTER_IMAGE=&lt;path to downloaded image&gt;
+RAM=&lt;memory in MB&gt;
+VCORES=&lt;number of virtual cores&gt;
+VM=asap-master
+virt-install \
+--network bridge=br0 \
+--name $VM  \
+-r $RAM \
+--vcpus $VCORES \
+--disk path=$ASAP_MASTER_IMAGE,device=disk,bus=virtio \
+--graphics vnc,listen=0.0.0.0,password=12345 \
+--connect qemu:///system \
+--virt-type kvm \
+--noautoconsole \
+--import -d
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check VM status:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo virsh list --all
+ Id    Name                           State
+----------------------------------------------------
+28    asap-master                    running
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start VM (if not running already):</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo virsh start asap-master
+setlocale: No such file or directory
+Domain asap-master started
+</pre></div>
+</div>
+<ul class="simple">
+<li>Login in asap-master using a VNC client (password <em>12345</em>) as <em>asap</em> user with password: <em>raiding536&amp;ivory</em></li>
+<li>Note the acquired IP address:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ ifconfig
+ens3      Link encap:Ethernet  HWaddr 52:54:00:e3:f0:24
+          inet addr:192.168.1.62  Bcast:192.168.1.255  Mask:255.255.255.0
+          inet6 addr: fe80::5054:ff:fee3:f024/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:2039 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:124 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:527 txqueuelen:1000
+          RX bytes:104691 (104.6 KB)  TX bytes:16689 (16.6 KB)
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:229 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:229 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:31684 (31.6 KB)  TX bytes:31684 (31.6 KB)
+</pre></div>
+</div>
+<ul>
+<li><p class="first">Download asap-worker image</p>
+</li>
+<li><dl class="first docutils">
+<dt>Create several asap-worker VMs from the same image using backing files:</dt>
+<dd><ul class="first simple">
+<li>Install required packages:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ yum install kvm python-virtinst libvirt libvirt-python
+</pre></div>
+</div>
+<ul class="simple">
+<li>Convert the image in qcow2 format:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo qemu-img convert -O qcow2 &lt;path to downloaded image&gt; asap-worker-readonly.qcow2
+</pre></div>
+</div>
+<ul class="simple">
+<li>Change ownership to readonly:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo chmod u-w asap-worker-readonly.qcow2
+</pre></div>
+</div>
+<ul class="simple">
+<li>Create VMs:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ for i in 1 2 3 4 5;
+do;
+VM=asap-worker-$i
+sudo qemu-img create -f qcow2 -b asap-worker-readonly.qcow2 $VM.qcow2
+sudo vert-install \
+--network bridge=br0 \
+--name $VM \
+--ram &lt;memory in MB&gt; \
+--vcores &lt;number of cores&gt; \
+--disk path=/tmp/$VM.qcow2,device=disk,bus=virtio \
+--graphics vnc,listen=0.0.0.0,password=12345 \
+--connect qemu:///system \
+--virt-type kvm \
+--noautoconsole \
+--import -d;
+done
+</pre></div>
+</div>
+<ul class="simple">
+<li>Check VM statuses</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo virsh list --all
+</pre></div>
+</div>
+<ul class="last simple">
+<li>Login in the worker VMs using a VNC client (password 12345) as <em>asap</em> user with password: <em>raiding536&amp;ivory</em></li>
+<li>Note the acquired IP address as done for the asap-master</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="configure-vms">
+<h2>Configure VMs<a class="headerlink" href="#configure-vms" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Update appropriately the guest IPs in the following configuration files in asap-master &amp; asap-workers:</dt>
+<dd><ul class="first last">
+<li>/etc/hosts</li>
+<li>~/asap/hadoop-2.7.1/etc/hadoop/yarn-site.xml</li>
+<li>~/asap/hadoop-2.7.1/etc/hadoop/core-site.xml</li>
+<li>~/asap/hadoop-2.7.1/etc/hadoop/mapred-site.xml</li>
+<li>~/asap/spark01/conf/spark-env.sh</li>
+<li>~/asap/workflow/src/main.coffee</li>
+<li>~/fabric-scripts/hadoop_yarn/fabfile.py</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="start-services">
+<h2>Start services<a class="headerlink" href="#start-services" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Start hadoop:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/fabric-scripts/hadoop_yarn/ &amp;&amp; fab start
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start mongo DB:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo service mongod start
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start IReS:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/IReS-Platform &amp;&amp; ./sbin/ires.sh stop
+</pre></div>
+</div>
+<ul class="simple">
+<li>Start Spark:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/spark01 &amp;&amp; ./sbin/start-all.sh
+</pre></div>
+</div>
+<ul class="simple">
+<li>Rebuild WMT and restart nginx:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/workflow/ &amp;&amp; grunt &amp;&amp; sudo service nginx reload
+</pre></div>
+</div>
+<ul>
+<li><dl class="first docutils">
+<dt>Access web services from your desktop</dt>
+<dd><ul class="first simple">
+<li>Forward port 3128 of the asap-master in your desktop local port 3128:</li>
+</ul>
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ ssh -L3128:<span class="nt">&lt;asap-master IP&gt;</span>:3128 &lt;host machine&gt; -N
+</pre></div>
+</div>
+<ul class="last simple">
+<li>Configure your web browser to use the proxy in localhost:3128</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The available Web services are:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Hadoop:</th><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:50070</td>
+</tr>
+<tr class="field-even field"><th class="field-name">HDFS explorer:</th><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:50070/explorer.html</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Yarn cluster:</th><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:8088/cluster</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Workflow Management Tool:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:8888/main.html</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">IReS:</th><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:1323/web/main</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Spark master:</th><td class="field-body"><a class="reference external" href="http:/">http:/</a>/&lt;asap-master IP&gt;:8080</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="run-sociometer-wind-use-case">
+<h2>Run sociometer WIND use case<a class="headerlink" href="#run-sociometer-wind-use-case" title="Permalink to this headline">¶</a></h2>
+<p>The descriptions of the abstract operators assembling the use case (<em>Wind_Latest_User_Profiling</em>, <em>Wind_Latest_Kmeans</em>, <em>Wind_Latest_Stereo_Type_Classification</em>, <em>Wind_Latest_Peak_Detection</em>, <em>Wind_Latest_OD_Matrix</em>, <em>Wind_Latest_Socio_Publisher</em>, <em>Wind_Latest_Peak_Publisher</em>, <em>Wind_Latest_ODMatrix_Publisher</em>, <em>Wind_Latest_Weblyzard_Uploader</em>) and the input dataset (<em>dataset_simulated</em>) are already defined in IReS.
+Moreover, the respective materialized operators are also defined in the IReS. In order to run the sociometer workflow and get start with the ASAP do the following:</p>
+<ul class="simple">
+<li>Save this file in your disk: <a class="reference download internal" href="_downloads/sociometer.json" download=""><code class="xref download docutils literal"><span class="pre">sociometer.json</span></code></a></li>
+<li>Navigate to the WMT Web UI.</li>
+<li>From the navigation bar, click “Load workflow” and in the prompt window select the previously downladed JSON file.</li>
+<li>The graph will appear in the workflow board:</li>
+</ul>
+<img alt="_images/sociometer-WMT.png" src="_images/sociometer-WMT.png" />
+<ul class="simple">
+<li>Click on the several operators (rectangulars) and datasets (ellipses) in order to see their task descriptions in the taskboard. Using WMT one can modify the graph: e.g. change the dataset input.</li>
+<li>Finally, click &#8220;Upload workflow&#8221; in the navigation bar; the workflow will be send to the IReS and will be listed among the other abstract workflows in the respective tab of the IReS Web UI. (The workflow will be overridden if already exists).</li>
+<li>Follow the specific link and you will be navigated in the abstract workflow view, depicted in the following image:</li>
+</ul>
+<img alt="_images/sociometer-abstract.png" src="_images/sociometer-abstract.png" />
+<ul class="simple">
+<li>The workflow now can be materialized by clicking the &#8220;Materialize Workflow&#8221; button and the materialized graph will be loaded. This workflow has two alternative materialized operators for the <em>Wind_Latest_Kmeans</em> abstract operator; one impemented using the KMeans implementation of the Spark MLlib library and one using the Swan KMeans clustering further described here: <a class="reference external" href="swan.html#k-means-clustering">swan.html#k-means-clustering</a>.
+There are also two alternative materialized operators for the <em>Wind_Latest_Peak_Detection</em> abstract operator; one impemented using pySpark and one using the nested RDD reduction further described here: <a class="reference external" href="spark.html#introduction">spark.html#introduction</a>.</li>
+</ul>
+<img alt="_images/sociometer-materialized.png" src="_images/sociometer-materialized.png" />
+<ul class="simple">
+<li>Finally you can instract IReS to execute the workflow by clicking in the &#8220;Execute workflow&#8221; button.</li>
+<li>IReS then will instruct Yarn to start a new application. The progress of the execution can be checked via the Execution view of the IReS and via the tracking URL pointing to the application on the Yarn cluster.</li>
+</ul>
+<img alt="_images/sociometer-execute.png" src="_images/sociometer-execute.png" />
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Guidelines for bootstraping ASAP cluster and running the WIND use case</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#create-vms">Create VMs</a></li>
+<li><a class="reference internal" href="#configure-vms">Configure VMs</a></li>
+<li><a class="reference internal" href="#start-services">Start services</a></li>
+<li><a class="reference internal" href="#run-sociometer-wind-use-case">Run sociometer WIND use case</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="telecom_analytics.html" title="previous chapter">Telecommunication Analytics</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/guidelines.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Asap consortium.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/guidelines.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
