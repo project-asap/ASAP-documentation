@@ -54,7 +54,6 @@ Prepare environment in the host machines:
 .. code:: bash
 
     $ sudo virsh start asap-master
-    setlocale: No such file or directory
     Domain asap-master started
 
 * Login in asap-master using a VNC client (password *12345*) as *asap* user with password: *raiding536&ivory*
