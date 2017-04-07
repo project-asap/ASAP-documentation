@@ -61,7 +61,7 @@
 RAM=&lt;memory in MB&gt;
 VCORES=&lt;number of virtual cores&gt;
 VM=asap-master
-virt-install \
+sudo virt-install \
 --network bridge=br0 \
 --name $VM  \
 -r $RAM \
@@ -145,7 +145,7 @@ lo        Link encap:Local Loopback
 do;
 VM=asap-worker-$i
 sudo qemu-img create -f qcow2 -b asap-worker-readonly.qcow2 $VM.qcow2
-sudo vert-install \
+sudo virt-install \
 --network bridge=br0 \
 --name $VM \
 --ram &lt;memory in MB&gt; \
@@ -174,6 +174,24 @@ done
 </li>
 </ul>
 </div>
+<div class="section" id="rename-hostnames">
+<h2>Rename hostnames<a class="headerlink" href="#rename-hostnames" title="Permalink to this headline">¶</a></h2>
+<p>Since the asap-workers were created using the same image we need to rename them.
+In order to do so:</p>
+<blockquote>
+<div><div class="code bash highlight-rst"><div class="highlight"><pre><span></span>declare -A workers=( [&quot;192.168.1.194&quot;]=&quot;asap-worker-1&quot; [&quot;192.168.1.70&quot;]=&quot;asap-worker-2&quot; [&quot;192.168.1.157&quot;]=&quot;asap-worker-3&quot;)
+for ip in &quot;${!workers[@]}&quot;; do ssh -t asap@$ip sudo sed -ie s/asap1/${workers[$ip]}/g /etc/hostname; done
+</pre></div>
+</div>
+</div></blockquote>
+<p>And then restart the VMs:</p>
+<blockquote>
+<div><div class="code bash highlight-rst"><div class="highlight"><pre><span></span>for i in 1 2 3; do sudo virsh shutdown asap-worker-$i; done
+for i in 1 2 3; do sudo virsh start asap-worker-$i; done
+</pre></div>
+</div>
+</div></blockquote>
+</div>
 <div class="section" id="configure-vms">
 <h2>Configure VMs<a class="headerlink" href="#configure-vms" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -186,12 +204,28 @@ done
 <li>~/asap/hadoop-2.7.1/etc/hadoop/mapred-site.xml</li>
 <li>~/asap/spark01/conf/spark-env.sh</li>
 <li>~/asap/workflow/src/main.coffee</li>
+<li>~/asap/spark01/conf/slaves</li>
 <li>~/fabric-scripts/hadoop_yarn/fabfile.py</li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
+</div>
+<div class="section" id="reformat-hdfs">
+<h2>Reformat HDFS<a class="headerlink" href="#reformat-hdfs" title="Permalink to this headline">¶</a></h2>
+<p>Delete old repositories:</p>
+<blockquote>
+<div><div class="code bash highlight-rst"><div class="highlight"><pre><span></span>for i in 1 2 3; do ssh asap-worker-$i rm -rf ~/asap/hdfs; done
+</pre></div>
+</div>
+</div></blockquote>
+<p>Reformat HDFS:</p>
+<blockquote>
+<div><div class="code bash highlight-rst"><div class="highlight"><pre><span></span>cd ~/fabric-scripts/hadoop_yarn/ &amp;&amp; fab formatHdfs
+</pre></div>
+</div>
+</div></blockquote>
 </div>
 <div class="section" id="start-services">
 <h2>Start services<a class="headerlink" href="#start-services" title="Permalink to this headline">¶</a></h2>
@@ -210,7 +244,7 @@ done
 <ul class="simple">
 <li>Start IReS:</li>
 </ul>
-<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/IReS-Platform &amp;&amp; ./sbin/ires.sh stop
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/IReS-Platform &amp;&amp; ./sbin/ires.sh start
 </pre></div>
 </div>
 <ul class="simple">
@@ -303,7 +337,9 @@ There are also two alternative materialized operators for the <em>Wind_Latest_Pe
 <li><a class="reference internal" href="#">Guidelines for bootstraping ASAP cluster and running the WIND use case</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
 <li><a class="reference internal" href="#create-vms">Create VMs</a></li>
+<li><a class="reference internal" href="#rename-hostnames">Rename hostnames</a></li>
 <li><a class="reference internal" href="#configure-vms">Configure VMs</a></li>
+<li><a class="reference internal" href="#reformat-hdfs">Reformat HDFS</a></li>
 <li><a class="reference internal" href="#start-services">Start services</a></li>
 <li><a class="reference internal" href="#run-sociometer-wind-use-case">Run sociometer WIND use case</a></li>
 </ul>

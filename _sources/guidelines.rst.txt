@@ -28,7 +28,7 @@ Prepare environment in the host machines:
     RAM=<memory in MB>
     VCORES=<number of virtual cores>
     VM=asap-master
-    virt-install \
+    sudo virt-install \
     --network bridge=br0 \
     --name $VM  \
     -r $RAM \
@@ -109,7 +109,7 @@ Prepare environment in the host machines:
         do;
         VM=asap-worker-$i
         sudo qemu-img create -f qcow2 -b asap-worker-readonly.qcow2 $VM.qcow2
-        sudo vert-install \
+        sudo virt-install \
         --network bridge=br0 \
         --name $VM \
         --ram <memory in MB> \
@@ -132,6 +132,23 @@ Prepare environment in the host machines:
     * Login in the worker VMs using a VNC client (password 12345) as *asap* user with password: *raiding536&ivory*
     * Note the acquired IP address as done for the asap-master
 
+Rename hostnames
+################
+Since the asap-workers were created using the same image we need to rename them.
+In order to do so:
+
+    .. code:: bash
+
+        declare -A workers=( ["192.168.1.194"]="asap-worker-1" ["192.168.1.70"]="asap-worker-2" ["192.168.1.157"]="asap-worker-3")
+        for ip in "${!workers[@]}"; do ssh -t asap@$ip sudo sed -ie s/asap1/${workers[$ip]}/g /etc/hostname; done
+
+And then restart the VMs:
+
+    .. code:: bash
+
+        for i in 1 2 3; do sudo virsh shutdown asap-worker-$i; done
+        for i in 1 2 3; do sudo virsh start asap-worker-$i; done
+
 Configure VMs
 #############
 
@@ -142,7 +159,23 @@ Configure VMs
     * ~/asap/hadoop-2.7.1/etc/hadoop/mapred-site.xml
     * ~/asap/spark01/conf/spark-env.sh
     * ~/asap/workflow/src/main.coffee
+    * ~/asap/spark01/conf/slaves
     * ~/fabric-scripts/hadoop_yarn/fabfile.py
+
+Reformat HDFS
+#############
+
+Delete old repositories:
+
+    .. code:: bash
+
+        for i in 1 2 3; do ssh asap-worker-$i rm -rf ~/asap/hdfs; done
+
+Reformat HDFS:
+
+    .. code:: bash
+
+         cd ~/fabric-scripts/hadoop_yarn/ && fab formatHdfs
 
 Start services
 ##############
@@ -163,7 +196,7 @@ Start services
 
 .. code:: bash
 
-    $ cd ~/asap/IReS-Platform && ./sbin/ires.sh stop
+    $ cd ~/asap/IReS-Platform && ./sbin/ires.sh start
 
 * Start Spark:
 
