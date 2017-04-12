@@ -120,12 +120,6 @@ lo        Link encap:Local Loopback
 <li><dl class="first docutils">
 <dt>Create several asap-worker VMs from the same image using backing files:</dt>
 <dd><ul class="first simple">
-<li>Install required packages:</li>
-</ul>
-<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ yum install kvm python-virtinst libvirt libvirt-python
-</pre></div>
-</div>
-<ul class="simple">
 <li>Convert the image in qcow2 format:</li>
 </ul>
 <div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo qemu-img convert -O qcow2 &lt;path to downloaded image&gt; asap-worker-readonly.qcow2
@@ -377,7 +371,7 @@ There are also two alternative materialized operators for the <em>Wind_Latest_Pe
       &copy;2016, Asap consortium.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.4</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |

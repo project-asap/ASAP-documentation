@@ -82,12 +82,6 @@ Prepare environment in the host machines:
 
 * Download asap-worker image
 * Create several asap-worker VMs from the same image using backing files:
-    * Install required packages:
-
-    .. code:: bash
-
-        $ yum install kvm python-virtinst libvirt libvirt-python
-
     * Convert the image in qcow2 format:
 
     .. code:: bash
