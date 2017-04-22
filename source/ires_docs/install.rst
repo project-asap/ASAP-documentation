@@ -351,6 +351,7 @@ iii. Add the LineCount abstract operator to the workflow. Select the `Abstract O
 iv. Describe the workflow by connecting the graph nodes defined in the previous steps, by entering the following text in the large text box:
 
 .. code:: javascript
+
 	asapServerLog,LineCount
 	LineCount,d1
 	d1,$$target

@@ -344,6 +344,11 @@ ii. Then we add the workflow parts one-by-one. First we add the asapServer-Log d
 button and enter the dataset name in the Comma seperated list text box. Then click the <cite>Add nodes</cite> button to add the dataset node to the workflow graph. Repeat this step to add an output node with name d1. Just enter the name <cite>d1</cite> to the text box and click the <cite>Add nodes</cite> button.
 iii. Add the LineCount abstract operator to the workflow. Select the <cite>Abstract Operator</cite> radio button, enter the operators name (LineCount) in the text box and click again the <cite>Add nodes</cite> button.
 iv. Describe the workflow by connecting the graph nodes defined in the previous steps, by entering the following text in the large text box:</p>
+<div class="code javascript highlight-default"><div class="highlight"><pre><span></span>asapServerLog,LineCount
+LineCount,d1
+d1,$$target
+</pre></div>
+</div>
 <p>Click the <cite>Change graph</cite> button</p>
 </div>
 <div class="section" id="workflow-materialization">
