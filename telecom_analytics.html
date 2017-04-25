@@ -47,107 +47,173 @@
 <h1>Telecommunication Analytics<a class="headerlink" href="#telecommunication-analytics" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
-<p>The goal of WIND was to design and implement a new application to take better advantage of the new big data approach for mobile applications. The ASAP telecommunications  application  will  show  how  a  number  of  analytical  services describing the mobility of people can be created on the basis of the data collected by the mobile network during routine operation. We developed three modules: the user profiling, the sociometer and the peak detection.   Moreover  some  additional  modules  are  defined and  developed  in  order  to  build  complete  workflows  going  from  the  data  to  the publication of the results, as shown in the figure below.</p>
-<img alt="_images/WIND_general_modules.png" src="_images/WIND_general_modules.png" />
-</div>
-<div class="section" id="peak-detection">
-<h2>Peak Detection<a class="headerlink" href="#peak-detection" title="Permalink to this headline">¶</a></h2>
-<p>This analysis detects relevant peaks representing an event. This is achieved by comparing the density of population (measured in calls) within a region in a given moment against the expected density for that area at that hour of the day. The overall analysis is decomposed in the Data Filter, the Distribution Computation and the Peak Detection operators. The operators are implemented as Spark applications (using the scala API) and they can be executed by submitting them to a running Spark installation.</p>
-<p>The overall calculation is illustrated here:</p>
-<img alt="_images/PeakDetection.png" src="_images/PeakDetection.png" />
-<p>In more details, the <strong>Data Filter</strong> operator expects a CDR dataset with the following fields:</p>
-<blockquote>
-<div><ol class="arabic simple">
-<li>caller id (masked)</li>
-<li>call date (format: yyyy-MM-dd)</li>
-<li>chargable duration</li>
-<li>tower identifier from which the call has initiated</li>
-<li>tower identifier where the call has ended</li>
-</ol>
-</div></blockquote>
-<p>Then, the process assumes a dataRaw dataset derived from the above and containing the following fields:</p>
-<blockquote>
+<dl class="docutils">
+<dt>The goal of WIND was to design and implement a new application to take better advantage of</dt>
+<dd><p class="first">the new big data approach for mobile applications. The ASAP telecommunications application
+will show how a number of analytical services describing the mobility of people can be created
+on the basis of the data collected by the mobile network during routine operation. The data we
+consider in the following is the call data records (CDR). For example a call started in a spatial
+cell1 and ended in another spatial cell2 will result in a single row in the log as follows: &lt;id32876, 10/10/2015 10:00:00, 5:00, Cell_1, Cell_2, VOICE&gt;
+containing the id of the user, the type of the event, when the event started, the initial cell, the
+end cell and the duration. Over this data Wind developed three workflows for three applications:</p>
+<blockquote class="last">
 <div><ul class="simple">
-<li>id : tower identifier from which the call has initiated</li>
-<li>hour: the hour of the day (derived by the call date)</li>
-<li>dow: the day of the week (derived by the call date)</li>
-<li>doy: the day of the year (derived by the call date)</li>
-<li>num: the number of calls started in this tower range at this hour of this specific day.</li>
+<li>Tourism Analysis: The analysis of tourism fluxes highlighting the mobility of a
+specific kind of users (Visitors) and their seasonality.</li>
+<li>Event Detection analysis: detecting events in a specific area analyzing the different
+kind of users involved and their origins.</li>
+<li>Car Sharing: Analyzing the systematic movements of users (Commuters) as base for a car
+sharing recommendation system.</li>
 </ul>
 </div></blockquote>
-<p>The next step of the process consists in defining the geographical area to analyze and to partition it into a set of regions. The same must be done for the time, where a timeframe is chosen (for instance, a month), partitioned into periods (for instance, days) and then into smaller time slots (for instance, hours). Time slots are described by a parameter T, while the regions that cover the area of analysis are described by a parameter S, both parameters being provided by the user. These two parameters, then, allow defining a spatio-temporal grid, and each observation of an input dataset can be assigned to one of its cells. The number of observations that fall in a cell defines its density. The input data is partitioned into two sets: a training dataset and a test dataset. For both datasets the spatiotemporal grid of densities is computed. The first will be used to compute the densities of a typical period for each region. The second dataset will be then compared against such typical period in order to detect significant deviations.</p>
-<p>The <strong>Distribution Computation</strong> operator requires input generated by the Data Filter step. Based on the densities obtained for each region and each time slot over the training dataset, an expected density value is computed for each region, by averaging the densities measured at the same time slot of all the periods in the time window covered by the dataset. For instance, we might obtain an expected density for each pair (region, hour of the day), i.e., 24 values for each region, assuming 24 one-hour time-slots. The result represents the standard behavior and it is saved in a new dataset named cpBase.</p>
-<p>Finally, the <strong>Peak Detection</strong> operator requires input from the previous steps. For each region and each time-slot, the corresponding density is compared against its expected value: if the difference is significant, an event of form (region, weight, time slot) is produced, representing its spatiotemporal slot and a discretized measure (weight) of how strong was the deviation. In particular, events are detected on the base of three parameters:</p>
-<blockquote>
-<div><ul class="simple">
-<li>a granularity of deviations: expressed as a percentage relative to the expected density;</li>
-<li>a minimum relative deviation: also expressed as a percentage, used to select significant deviations;</li>
-<li>an absolute minimum deviation: expressed as an integer number, used to discard extreme cases with very low densities.</li>
-</ul>
-</div></blockquote>
-<div class="section" id="run-peak-detection">
-<h3>Run Peak Detection<a class="headerlink" href="#run-peak-detection" title="Permalink to this headline">¶</a></h3>
-<p>For the <strong>Data Filter</strong> module, run the following command:</p>
-<p>$SPARK_HOME/bin/spark-submit &#8211;py-files cdr.py peak_detection/data_filter.py &lt;dataset&gt; &lt;spatial_division&gt; &lt;start_date&gt; &lt;end_date&gt;</p>
-<dl class="docutils">
-<dt>where:</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:</dt>
-<dd>user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type</dd>
-</dl>
-</li>
-<li>spatial_division: File containing the mapping of cells to regions.</li>
-<li>start_date: The starting date of the analysis (format: %Y-%m-%d)</li>
-<li>end_date: The ending date of the analysis (format: %Y-%m-%d)</li>
-</ul>
 </dd>
 </dl>
-<p>The results are stored into the hdfs file: /peaks/hourly_&lt;region&gt;_&lt;start_date&gt;_&lt;end_date&gt; where the &lt;region&gt; is derived by the spatial_division.</p>
-<p>For the <strong>Distribution Computation</strong> module, run:</p>
-<p>$SPARK_HOME/bin/spark-submit peak_detection/typical_distribution_computation.py &lt;dataset&gt;</p>
-<p>where &lt;dataset&gt; is consisting of tuples containing the following information: &lt;region&gt;,&lt;day_of_week&gt;,&lt;hour_of_day&gt;,&lt;date&gt;,&lt;count&gt;</p>
-<p>The results are also stored into hdfs: /peaks/weekly_&lt;region&gt;_&lt;start_date&gt;_&lt;end_date&gt; where the &lt;region&gt;, &lt;start_date&gt; and &lt;end_date&gt; are derived by the name of the dataset.</p>
-<p>For the <strong>Peak Detection</strong> module, run:</p>
-<p>$SPARK_HOME/bin/spark-submit peak_detection/peak_detection.py &lt;hourly_presense&gt; &lt;weekly_presense&gt;</p>
-<dl class="docutils">
-<dt>where:</dt>
-<dd><ul class="first last simple">
-<li>hourly_presence: The hourly presence dataset consisting of tuples containing the following information: &lt;region&gt;,&lt;day_of_week&gt;,&lt;hour_of_day&gt;,&lt;date&gt;,&lt;count&gt;</li>
-<li>weekly_presence: The weekly presence dataset consisting of tuples containing the following information: &lt;region&gt;,&lt;day_of_week&gt;,&lt;hour_of_day&gt;,&lt;count&gt;</li>
-</ul>
-</dd>
-</dl>
-<p>The results are stored into the local file: peaks_&lt;region&gt;_&lt;start_date&gt;_&lt;end_date&gt; where the &lt;region&gt;, &lt;start_date&gt; and &lt;end_date&gt; are derived by the name of the dataset.</p>
-</div>
-</div>
-<div class="section" id="user-profiling">
-<h2>User Profiling<a class="headerlink" href="#user-profiling" title="Permalink to this headline">¶</a></h2>
-<p>The spatio temporal profile is an aggregated representation of the presence of a user in a certain area of interest during different pre-defined timeslots. This profile is
-constructed starting from the CDR data and with reference to a particular spatial respresentation. The CDR spatial coverage describes the distribution of the antennas used by the mobile telecommunications operator on the territory, which can be used to estimate the corresponding coverage. A spatio temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. A spatio-temporal profile codes the presence of a user in the area of interest in a particular time (or timeslot) identified by the information in the CDR. The idea is that if a person makes a call in the area A at time t, it means that he is present in that area at that time.</p>
-<div class="section" id="run-user-profiling">
-<h3>Run User Profiling<a class="headerlink" href="#run-user-profiling" title="Permalink to this headline">¶</a></h3>
-<p>Run:  $SPARK_HOME/bin/spark-submit &#8211;py-files cdr.py sociometer/user_profiling.py &lt;dataset&gt; &lt;spatial_division&gt; &lt;start_date&gt; &lt;end_date&gt;</p>
-<dl class="docutils">
-<dt>where:</dt>
-<dd><ul class="first last simple">
-<li><dl class="first docutils">
-<dt>dataset: The dataset location. Can be any Hadoop-supported file system URI. The expected dataset schema is:</dt>
-<dd>user_id;null;null;start_date;start_time;duration;null;null;null;start_gsm_cell;end_gsm_cell;record_type where start_time column is expected to have this format: &#8216;%Y-%m-%d %X&#8217;.</dd>
-</dl>
-</li>
-<li>spatial_division: File containing the mapping of cells to regions.</li>
-<li>start_date: The starting date of the analysis (format: %Y-%m-%d)</li>
-<li>end_date: The ending date of the analysis (format: %Y-%m-%d)</li>
-</ul>
-</dd>
-</dl>
-<p>The results are stored into hdfs: /peaks/profiles-&lt;start_week&gt;-&lt;end_week&gt; where start_week and end_week are the starting and the ending week (format: &lt;ISO_year&gt;_&lt;ISO_week&gt;) of the specific time window.</p>
-</div>
+<p>These three applications are realized by means of six basic modules which as shown below:</p>
+<img alt="_images/CS.png" src="_images/CS.png" />
+<img alt="_images/TA.png" src="_images/TA.png" />
+<img alt="_images/ED.png" src="_images/ED.png" />
+<p>Exception made for the Data Loading Module which has the aim of transferring data from Wind servers to ASPA cluster,
+in the following sections we will describe these six modules and how to execute them.</p>
 </div>
 <div class="section" id="sociometer">
 <h2>Sociometer<a class="headerlink" href="#sociometer" title="Permalink to this headline">¶</a></h2>
-<p>It classifies the users using the presence of cellphone users. In particular, it identifies residents, commuters and visitors.  K-means identifies the representative profiles, which are then labeled with the mobility behavior categories just described. Several profiles might be associated to the same category, basically representing different facets of the same class of users. The classification phase assigns each spatio-temporal user’s profile to the closest representative profile based on a proper distance measure. The output is the semantic enrichment of the set of users with tags representing the classification for each user.</p>
+<p>It classifies the users using the presence of cellphone users. In particular, it identifies
+residents, commuters and visitors. K-means identifies the representative profiles, which
+are then labeled with the mobility behavior categories just described. Several profiles
+might be associated to the same category, basically representing different facets of the
+same class of users. The classification phase assigns each spatio-temporal user’s profile
+to the closest representative profile based on a proper distance measure. The output is
+the semantic enrichment of the set of users with tags representing the classification for
+each user. In ASAP platform this module is composed by three task: User Profiling, K-Means,
+Classification.</p>
+<div class="section" id="user-profiling">
+<h3>User Profiling<a class="headerlink" href="#user-profiling" title="Permalink to this headline">¶</a></h3>
+<p>The spatio temporal profile is an aggregated representation of the presence of a user in a
+certain area of interest during different predefined timeslots. This profile is constructed
+starting from the CDR data and with reference to a particular spatial representation. The
+CDR spatial coverage describes the distribution of the antennas used by the mobile
+telecommunications operator on the territory, which can be used to estimate the corresponding
+coverage. A spatio temporal profile codes the presence of a user in the area of interest
+in a particular time (or time-slot) identified by the information in the CDR. A spatio-temporal
+profile codes the presence of a user in the area of interest in a particular time (or time-slot)
+identified by the information in the CDR. The idea is that if a person makes a call in the area A
+at time t, it means that he is present in that area at that time.</p>
+</div>
+<div class="section" id="run-user-profiling-sub-module">
+<h3>Run User Profiling sub-module<a class="headerlink" href="#run-user-profiling-sub-module" title="Permalink to this headline">¶</a></h3>
+<p>Run: $SPARK_HOME/bin/spark-submit user_profiling.py &lt;dataset path&gt; &lt;spatial region file&gt; &lt;format file&gt; &lt;format date&gt; &lt;area identifier&gt;</p>
+<p>Parameter:
+dataset path: path on hdfs where the dataset is located
+spatial region file: csv files with the association GSM antenna &#8211;&gt; spatial region
+field2col: file containing the format of the csv files composing the dataset
+format date: the date format (according to python datetime module) of the cdr
+area identifier: a string used to name the results files</p>
+<dl class="docutils">
+<dt>Output: profiles will be saved in this path: /profiles/&lt;area identifier&gt;-&lt;year&gt;_&lt;week&gt;. Week is the first week of the corresponding</dt>
+<dd>4 weeks block analyzed. These two parameters are computed inside the script, by scanning all the dataset and assigning each file to the
+corresponding week.</dd>
+</dl>
+</div>
+<div class="section" id="typical-profiles-computation-clustering-centroids-extractions-and-classification">
+<h3>Typical profiles computation (clustering, centroids extractions and classification)<a class="headerlink" href="#typical-profiles-computation-clustering-centroids-extractions-and-classification" title="Permalink to this headline">¶</a></h3>
+<p>To group users according to their spatio-temporal profile, looking for typical profiles,
+we use k-means clustering algorithm. We aim to group users into 100 groups (k=100), and we use
+euclidean distance to compare two profiles. Once found typical profiles, we compare them with
+a set of labeled stereotypes, representing the typical behaviors for each user category we are
+interested to. As an instance, the typical profile of a resident user in particular area would
+require the user to make calls from that area everyday at every possible time.</p>
+</div>
+<div class="section" id="run-profiles-computation">
+<h3>Run Profiles Computation<a class="headerlink" href="#run-profiles-computation" title="Permalink to this headline">¶</a></h3>
+<p>Run:   $SPARK_HOME/bin/spark-submit clustering.py &lt;dataset path&gt; &lt;area identifier&gt;</p>
+<p>Parameter:
+dataset path: path on hdfs where the dataset is located
+area identifier: the string used during the profiling step.</p>
+<p>Output:
+The script loads all the profiles, for each block of 4 weeks,
+clusters them, finds the centroids, assign a label to each centroid and save them to the HDFS path /centroids/&lt;area identifier&gt;-&lt;year&gt;_&lt;week&gt;</p>
+</div>
+<div class="section" id="users-classification">
+<h3>Users Classification<a class="headerlink" href="#users-classification" title="Permalink to this headline">¶</a></h3>
+<p>The typical profiles computation returns a set of profiles with their relative label. So, we
+now need to assign the proper label to each one of the the user profile, for each one of the areas
+she visited.</p>
+</div>
+<div class="section" id="run-users-classification">
+<h3>Run Users Classification<a class="headerlink" href="#run-users-classification" title="Permalink to this headline">¶</a></h3>
+<p>$SPARK_HOME/bin/spark-submit stereo_type_classification.py &lt;dataset path&gt; &lt;area identifier&gt;</p>
+<p>Parameter:
+dataset path: path on hdfs where the dataset is located
+area identifier: the string used during the profiling step. The script loads all the profiles, assign each profile
+to the nearest centroids and save users label.</p>
+<p>Output:
+-user annotation, saved on /annotation/&lt;area identifier&gt;-&lt;year&gt;_&lt;week&gt;
+-area presence composition: saved on local file system, on ./results/sociometer-&lt;area identifier&gt;-&lt;year&gt;_&lt;week&gt;.csv</p>
+<p>Users labeling:</p>
+<p>Next use cases take advantage of users labeling made from Sociometer. Hence, we provide a script to get
+a csv file with data in the format (user_id,area)-&gt; label</p>
+</div>
+<div class="section" id="run-users-labeling">
+<h3>Run Users labeling<a class="headerlink" href="#run-users-labeling" title="Permalink to this headline">¶</a></h3>
+<p>Run :
+$HADOOP_HOME/bin/hadoop fs -get /annotation/&lt;area identifier&gt; .
+cat annotation-&lt;area identifier&gt;/part* &gt; user_annotation.csv</p>
+</div>
+</div>
+<div class="section" id="peak-detection">
+<h2>Peak Detection<a class="headerlink" href="#peak-detection" title="Permalink to this headline">¶</a></h2>
+<p>This analysis detects relevant peaks representing an event. This is achieved by comparing the
+density of population (measured in calls) within a region in a given moment against the expected density
+for that area at that hour of the day. The overall analysis is decomposed in two sub tasks: the Timeseries
+Computation and the Anomalies Detection. Timeseries for each area and user category are the baseline
+to define the expected presences for each time-slot. Then, each datapoint, that is the hourly presence at a given
+time for a given category in a certain area, is compared among the expected hourly presence.</p>
+<div class="section" id="run-peak-detection">
+<h3>Run Peak Detection<a class="headerlink" href="#run-peak-detection" title="Permalink to this headline">¶</a></h3>
+<p>Run:
+$SPARK_HOME/bin/spark-submit presence.py &lt;region of interest&gt; &lt;user label annotation&gt;</p>
+<p>Parameter:
+&lt;region of interest&gt; : a mapping in the form of antenna : region of interest
+&lt;user label annotation&gt; : the user2label.csv computed previously</p>
+</div>
+</div>
+<div class="section" id="o-d-matrices">
+<h2>O/D Matrices<a class="headerlink" href="#o-d-matrices" title="Permalink to this headline">¶</a></h2>
+<p>Based on the result of the sociometer it is possible to build a matrix of flows considering
+the as “home” the area where a user is classified as Resident or dynamic Resident.</p>
+<div class="section" id="run-o-d-matrices">
+<h3>Run O/D Matrices<a class="headerlink" href="#run-o-d-matrices" title="Permalink to this headline">¶</a></h3>
+<p>Run:  $SPARK_HOME/bin/spark-submit od.py &lt;region of interest&gt; &lt;user label annotation&gt;</p>
+<blockquote>
+<div>Parameter:
+&lt;region of interest&gt; : a mapping in the form of antenna : region of interest
+&lt;user label annotation&gt; : the user2label.csv computed previously</div></blockquote>
+</div>
+</div>
+<div class="section" id="matching-process">
+<h2>Matching Process<a class="headerlink" href="#matching-process" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>The matching process is a visual analytic module, which is a standard module  of ASAP platform.
+In fact it is realized by an aggregation of the results obtained by the Sociometer and the
+O/D Matrix with a lower granularity (morning, afternoon, evening, night). In this way each
+user will be profiled in terms of their movement between first and second most frequent locations.
+Then a graph is build considering this information to link two users. At this point the
+visual graph analytic is able to discover communities, or check for each user which are
+the possible candidates for car sharing. Those analytical tools for graph are available
+also in Mllib and than are easy to use in the platform.</div></blockquote>
+</div>
+<div class="section" id="publishing-module">
+<h2>Publishing Module<a class="headerlink" href="#publishing-module" title="Permalink to this headline">¶</a></h2>
+<p>This module is responsible of sending data to the WebLyzard  platform, it makes only data
+format transformation and communication.</p>
+<div class="section" id="run-publishing-module">
+<h3>Run Publishing module<a class="headerlink" href="#run-publishing-module" title="Permalink to this headline">¶</a></h3>
+<p>Sociometer publishing: python socio_publisher.py &lt;area_identifier&gt;
+Peak detection publishing: python presence_publisher.py &lt;area_identifier&gt;
+O/D matrices: python od_publisher.py &lt;area_identifier&gt;</p>
+<p>Then, data need to be uploaded to weblyzard platform with:
+python sociometer_uploader.py</p>
+</div>
 </div>
 </div>
 
@@ -161,15 +227,29 @@ constructed starting from the CDR data and with reference to a particular spatia
   <ul>
 <li><a class="reference internal" href="#">Telecommunication Analytics</a><ul>
 <li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#sociometer">Sociometer</a><ul>
+<li><a class="reference internal" href="#user-profiling">User Profiling</a></li>
+<li><a class="reference internal" href="#run-user-profiling-sub-module">Run User Profiling sub-module</a></li>
+<li><a class="reference internal" href="#typical-profiles-computation-clustering-centroids-extractions-and-classification">Typical profiles computation (clustering, centroids extractions and classification)</a></li>
+<li><a class="reference internal" href="#run-profiles-computation">Run Profiles Computation</a></li>
+<li><a class="reference internal" href="#users-classification">Users Classification</a></li>
+<li><a class="reference internal" href="#run-users-classification">Run Users Classification</a></li>
+<li><a class="reference internal" href="#run-users-labeling">Run Users labeling</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#peak-detection">Peak Detection</a><ul>
 <li><a class="reference internal" href="#run-peak-detection">Run Peak Detection</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#user-profiling">User Profiling</a><ul>
-<li><a class="reference internal" href="#run-user-profiling">Run User Profiling</a></li>
+<li><a class="reference internal" href="#o-d-matrices">O/D Matrices</a><ul>
+<li><a class="reference internal" href="#run-o-d-matrices">Run O/D Matrices</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#sociometer">Sociometer</a></li>
+<li><a class="reference internal" href="#matching-process">Matching Process</a></li>
+<li><a class="reference internal" href="#publishing-module">Publishing Module</a><ul>
+<li><a class="reference internal" href="#run-publishing-module">Run Publishing module</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
