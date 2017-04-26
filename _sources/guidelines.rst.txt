@@ -19,7 +19,7 @@ Prepare environment in the host machines:
 
 * Install required packages `Centos 7 <http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22:26,%22gen%22:0%7D,%7B%22name%22:%22XYZ%22%7D,69,279,0%5D>`_, `Ubuntu <https://help.ubuntu.com/community/KVM/Installation#Install_Necessary_Packages>`_:
 * Create network bridge for letting the VMs to access to the LAN `Centos 7 <chrome-extension://jdbefljfgobbmcidnmpjamcbhnbphjnb/http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22%3A33%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C69%2C401%2C0%5D>`_, `Ubuntu <https://help.ubuntu.com/community/KVM/Networking#Creating_a_network_bridge_on_the_host>`_)
-* Download asap-master image
+* Download `asap-master image <https://pithos.okeanos.grnet.gr/public/FNNV4BH8YoOvPshFLrwdu7>`_
 * Create asap-master VM:
 
 .. code:: bash
@@ -80,7 +80,7 @@ Prepare environment in the host machines:
               collisions:0 txqueuelen:1
               RX bytes:31684 (31.6 KB)  TX bytes:31684 (31.6 KB)
 
-* Download asap-worker image
+* Download `asap-worker image <https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7>`_
 * Create several asap-worker VMs from the same image using backing files:
     * Convert the image in qcow2 format:
 
