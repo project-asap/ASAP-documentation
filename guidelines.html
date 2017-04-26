@@ -54,7 +54,7 @@
 <ul class="simple">
 <li>Install required packages <a class="reference external" href="http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22:26,%22gen%22:0%7D,%7B%22name%22:%22XYZ%22%7D,69,279,0%5D">Centos 7</a>, <a class="reference external" href="https://help.ubuntu.com/community/KVM/Installation#Install_Necessary_Packages">Ubuntu</a>:</li>
 <li>Create network bridge for letting the VMs to access to the LAN <a class="reference external" href="chrome-extension://jdbefljfgobbmcidnmpjamcbhnbphjnb/http://linux.dell.com/files/whitepapers/KVM_Virtualization_in_RHEL_7_Made_Easy.pdf#%5B%7B%22num%22%3A33%2C%22gen%22%3A0%7D%2C%7B%22name%22%3A%22XYZ%22%7D%2C69%2C401%2C0%5D">Centos 7</a>, <a class="reference external" href="https://help.ubuntu.com/community/KVM/Networking#Creating_a_network_bridge_on_the_host">Ubuntu</a>)</li>
-<li>Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/FNNV4BH8YoOvPshFLrwdu7">asap-master image</a></li>
+<li>Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/FNNV4BH8YoOvPshFLrwdu7">asap-master image</a> (100GB).</li>
 <li>Create asap-master VM:</li>
 </ul>
 <div class="code bash highlight-rst"><div class="highlight"><pre><span></span>ASAP_MASTER_IMAGE=&lt;path to downloaded image&gt;
@@ -115,7 +115,7 @@ lo        Link encap:Local Loopback
 </pre></div>
 </div>
 <ul>
-<li><p class="first">Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7">asap-worker image</a></p>
+<li><p class="first">Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7">asap-worker image</a> (36GB).</p>
 </li>
 <li><dl class="first docutils">
 <dt>Create several asap-worker VMs from the same image using backing files:</dt>
