@@ -115,17 +115,11 @@ lo        Link encap:Local Loopback
 </pre></div>
 </div>
 <ul>
-<li><p class="first">Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7">asap-worker image</a> (36GB).</p>
+<li><p class="first">Download <a class="reference external" href="https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7">asap-worker image</a> (50GB).</p>
 </li>
 <li><dl class="first docutils">
 <dt>Create several asap-worker VMs from the same image using backing files:</dt>
 <dd><ul class="first simple">
-<li>Convert the image in qcow2 format:</li>
-</ul>
-<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo qemu-img convert -O qcow2 &lt;path to downloaded image&gt; asap-worker-readonly.qcow2
-</pre></div>
-</div>
-<ul class="simple">
 <li>Change ownership to readonly:</li>
 </ul>
 <div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ sudo chmod u-w asap-worker-readonly.qcow2
@@ -142,7 +136,7 @@ sudo virt-install \
 --network bridge=br0 \
 --name $VM \
 --ram &lt;memory in MB&gt; \
---vcores &lt;number of cores&gt; \
+--vcpus &lt;number of cores&gt; \
 --disk path=/tmp/$VM.qcow2,device=disk,bus=virtio \
 --graphics vnc,listen=0.0.0.0,password=12345 \
 --connect qemu:///system \

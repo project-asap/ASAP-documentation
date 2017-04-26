@@ -80,14 +80,8 @@ Prepare environment in the host machines:
               collisions:0 txqueuelen:1
               RX bytes:31684 (31.6 KB)  TX bytes:31684 (31.6 KB)
 
-* Download `asap-worker image <https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7>`_ (36GB).
+* Download `asap-worker image <https://pithos.okeanos.grnet.gr/public/u2im1nyVFYuOErIgA2enD7>`_ (50GB).
 * Create several asap-worker VMs from the same image using backing files:
-    * Convert the image in qcow2 format:
-
-    .. code:: bash
-
-        $ sudo qemu-img convert -O qcow2 <path to downloaded image> asap-worker-readonly.qcow2
-
     * Change ownership to readonly:
 
     .. code:: bash
@@ -106,7 +100,7 @@ Prepare environment in the host machines:
         --network bridge=br0 \
         --name $VM \
         --ram <memory in MB> \
-        --vcores <number of cores> \
+        --vcpus <number of cores> \
         --disk path=/tmp/$VM.qcow2,device=disk,bus=virtio \
         --graphics vnc,listen=0.0.0.0,password=12345 \
         --connect qemu:///system \
