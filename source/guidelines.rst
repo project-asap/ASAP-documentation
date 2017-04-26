@@ -150,9 +150,9 @@ Configure VMs
     * ~/asap/hadoop-2.7.1/etc/hadoop/yarn-site.xml
     * ~/asap/hadoop-2.7.1/etc/hadoop/core-site.xml
     * ~/asap/hadoop-2.7.1/etc/hadoop/mapred-site.xml
-    * ~/asap/spark01/conf/spark-env.sh
+    * ~/asap/spark-nested/conf/spark-env.sh
     * ~/asap/workflow/src/main.coffee
-    * ~/asap/spark01/conf/slaves
+    * ~/asap/spark-nested/conf/slaves
     * ~/fabric-scripts/hadoop_yarn/fabfile.py
 
 Reformat HDFS
@@ -195,7 +195,7 @@ Start services
 
 .. code:: bash
 
-    $ cd ~/asap/spark01 && ./sbin/start-all.sh
+    $ cd ~/asap/spark-nested && ./sbin/start-all.sh
 
 * Rebuild WMT and restart nginx:
 

@@ -195,9 +195,9 @@ for i in 1 2 3; do sudo virsh start asap-worker-$i; done
 <li>~/asap/hadoop-2.7.1/etc/hadoop/yarn-site.xml</li>
 <li>~/asap/hadoop-2.7.1/etc/hadoop/core-site.xml</li>
 <li>~/asap/hadoop-2.7.1/etc/hadoop/mapred-site.xml</li>
-<li>~/asap/spark01/conf/spark-env.sh</li>
+<li>~/asap/spark-nested/conf/spark-env.sh</li>
 <li>~/asap/workflow/src/main.coffee</li>
-<li>~/asap/spark01/conf/slaves</li>
+<li>~/asap/spark-nested/conf/slaves</li>
 <li>~/fabric-scripts/hadoop_yarn/fabfile.py</li>
 </ul>
 </dd>
@@ -243,7 +243,7 @@ for i in 1 2 3; do sudo virsh start asap-worker-$i; done
 <ul class="simple">
 <li>Start Spark:</li>
 </ul>
-<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/spark01 &amp;&amp; ./sbin/start-all.sh
+<div class="code bash highlight-rst"><div class="highlight"><pre><span></span>$ cd ~/asap/spark-nested &amp;&amp; ./sbin/start-all.sh
 </pre></div>
 </div>
 <ul class="simple">
